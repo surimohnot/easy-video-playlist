@@ -1,0 +1,97 @@
+.evp-video-player {
+    *,
+	*:before,
+	*:after {
+		box-sizing: inherit;
+		min-width: 0;
+	}
+
+	animation-duration: 0.001s;
+	animation-name: evpPlaylistAdded;
+
+	input[type="range"]::-webkit-slider-runnable-track,
+	input[type="range"]::-moz-range-track {
+		box-shadow: none !important;
+	}
+
+	scrollbar {
+		width: 6px; /* Adjust the width as needed */
+		background-color: #f0f0f0; /* Set the background color of the track */
+	}
+	  
+	/* Define the scrollbar thumb (the draggable part) */
+	scrollbar thumb {
+		background-color: #888; /* Set the color of the scrollbar thumb */
+	}
+	  
+	/* Define scrollbar behavior on hover */
+	scrollbar:hover thumb {
+		background-color: #555; /* Change color on hover if desired */
+	}
+
+	/* Hide the default scrollbar */
+	::-webkit-scrollbar {
+		width: 6px; /* Adjust this width as needed */
+	}
+	
+	/* Define the scrollbar track */
+	::-webkit-scrollbar-track {
+		background: transparent; /* You can set a background color if desired */
+	}
+	
+	/* Define the scrollbar thumb (the draggable part) */
+	::-webkit-scrollbar-thumb {
+		background: #888; /* Set the color of the scrollbar thumb */
+		border-radius: 3px; /* Rounded corners for the thumb */
+	}
+	
+	/* Define scrollbar behavior on hover */
+	::-webkit-scrollbar-thumb:hover {
+		background: #555; /* Change color on hover if desired */
+	}
+
+	margin-bottom: 20px;
+
+	embed, iframe, object, video {
+		margin: 0 !important;
+		padding: 0 !important;
+	}
+}
+
+.evp-playlist__wrapper {
+	display: none;
+}
+
+.evp-playlist__loading {
+	width: 100%;
+	height: 400px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	&:before {
+		content: '';
+		width: 25px;
+		height: 25px;
+		border-radius: 100%;
+		border: 4px solid #f2f2f2;
+		border-top-color: #00b2ff;
+		animation: spin 1s linear infinite;
+	}
+}
+
+.evp-single-video__content {
+	border: 0;
+	border-radius: 12px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+@keyframes evpPlaylistAdded {  
+	from { opacity: 0.01; }
+	to { opacity: 0; }  
+}

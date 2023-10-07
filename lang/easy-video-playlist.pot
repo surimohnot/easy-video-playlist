@@ -1,0 +1,171 @@
+# Easy Video Playlist
+# Copyright (C) 2023 Easy Podcast Pro
+# This file is distributed under the GPL-3.0+.
+# Easy Podcast Pro <contact@easypodcastpro.com>
+msgid ""
+msgstr ""
+"Project-Id-Version: Easy Video Playlist 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/easy-video-playlist\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2023-10-02T14:49:18+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.7.1\n"
+"X-Domain: easy-video-playlist\n"
+
+#. Plugin Name of the plugin
+#: inc/storage.php:21
+#: inc/storage.php:22
+#: templates/partials/header.php:13
+msgid "Easy Video Playlist"
+msgstr ""
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+msgid "https://easypodcastpro.com"
+msgstr ""
+
+#. Author of the plugin
+msgid "Easy Podcast Pro"
+msgstr ""
+
+#: inc/admin.php:21
+#: inc/admin.php:22
+#: assets/scripts/block/index.js:7
+msgid "Easy Video Playlist"
+msgstr ""
+
+#: inc/front.php:61
+msgid "No playlist provided."
+msgstr ""
+
+#: inc/front.php:66
+msgid "This playlist does not exist any more."
+msgstr ""
+
+#: inc/front.php:95
+msgid "Load More"
+msgstr ""
+
+#: inc/includes.php:27
+msgid "Enter URL of the Video"
+msgstr ""
+
+#: inc/includes.php:28
+msgid "Video URL"
+msgstr ""
+
+#: inc/includes.php:29
+msgid "Title"
+msgstr ""
+
+#: inc/includes.php:30
+msgid "Author"
+msgstr ""
+
+#: inc/includes.php:31
+msgid "Author URL"
+msgstr ""
+
+#: inc/includes.php:32
+msgid "Thumbnail Image URL"
+msgstr ""
+
+#: inc/includes.php:33
+msgid "Add Video"
+msgstr ""
+
+#: inc/includes.php:34
+msgid "Update"
+msgstr ""
+
+#: inc/includes.php:35
+msgid "Cancel"
+msgstr ""
+
+#: inc/includes.php:36
+msgid "Edit Video Information"
+msgstr ""
+
+#: lib/class-singleton.php:49
+msgid "Cannot clone a singleton."
+msgstr ""
+
+#: lib/class-singleton.php:62
+msgid "Cannot serialize a singleton."
+msgstr ""
+
+#: lib/class-singleton.php:75
+msgid "Cannot unserialize a singleton."
+msgstr ""
+
+#: templates/admin-page.php:11
+msgid "Playlist Manager"
+msgstr ""
+
+#: templates/admin-page.php:12
+msgid "Settings"
+msgstr ""
+
+#: templates/partials/playlist.php:13
+msgid "Your Playlists"
+msgstr ""
+
+#: templates/partials/playlist.php:18
+msgid "Create New Playlist"
+msgstr ""
+
+#: templates/partials/playlist.php:19
+msgid "Enter Name of Your New Playlist"
+msgstr ""
+
+#: templates/partials/playlist.php:22
+msgid "Add Playlist"
+msgstr ""
+
+#: templates/partials/playlist.php:37
+msgid "Video List"
+msgstr ""
+
+#: templates/partials/playlist.php:38
+msgid "Playlist Info"
+msgstr ""
+
+#: templates/partials/playlist.php:43
+msgid "Add Video to Playlist"
+msgstr ""
+
+#: templates/partials/playlist.php:50
+msgid "Update Order"
+msgstr ""
+
+#: templates/partials/playlist.php:55
+msgid "Shortcode for this playlist"
+msgstr ""
+
+#: assets/scripts/block/edit.js:109
+msgid "Show Playlist"
+msgstr ""
+
+#: assets/scripts/block/edit.js:120
+msgid "Edit Playlist"
+msgstr ""
+
+#: assets/scripts/block/index.js:8
+msgid "Player for WP Video"
+msgstr ""
+
+#: assets/scripts/block/index.js:12
+msgid "Video Playlist Player"
+msgstr ""
+
+#: assets/scripts/block/index.js:13
+msgid "Vimeo player"
+msgstr ""
+
+#: assets/scripts/block/index.js:14
+msgid "Youtube player"
+msgstr ""

@@ -1,0 +1,2 @@
+== Resources ==
+* Plyr JavaScript Video Library https://plyr.io/, (c) [Sam Potts](https://twitter.com/sam_potts), [MIT](https://github.com/sampotts/plyr/blob/master/LICENSE.md)
