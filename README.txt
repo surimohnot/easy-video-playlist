@@ -2,7 +2,7 @@
 Contributors: easypodcastpro
 Tags: 
 Requires at least: 6.0
-Tested up to: 6.2
+Tested up to: 6.4.2
 Requires PHP: 7.3
 Stable tag: 1.0.0
 License: GPLv3 or later

@@ -81,7 +81,7 @@ function evp_add_new_playlist() {
 	check_ajax_referer('evp-admin-ajax-nonce', 'security');
 
     // Get Playlist Name.
-    $label   = isset($_POST['playlist']) ? wp_unslash($_POST['playlist']) : '';
+    $label   = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
     $key     = strtolower(str_replace(' ', '-', $label));
     $success = false;
     $data    = false;
@@ -124,7 +124,7 @@ function evp_delete_playlist() {
     check_ajax_referer('evp-admin-ajax-nonce', 'security');
 
     // Get Playlist Name.
-    $playlist = isset($_POST['playlist']) ? wp_unslash($_POST['playlist']) : '';
+    $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
     $success = false;
     $data    = false;
     $message = false;
@@ -158,8 +158,8 @@ function evp_add_new_video() {
 	check_ajax_referer('evp-admin-ajax-nonce', 'security');
 
     // Get Playlist Name.
-    $playlist = isset($_POST['playlist']) ? wp_unslash($_POST['playlist']) : '';
-    $video    = isset($_POST['videourl']) ? wp_unslash($_POST['videourl']) : '';
+    $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
+    $video    = isset($_POST['videourl']) ? esc_url_raw(wp_unslash($_POST['videourl'])) : '';
     $success = false;
     $data    = false;
     $message = false;
@@ -214,8 +214,8 @@ function evp_delete_video() {
     // Nounce Verification.
     check_ajax_referer('evp-admin-ajax-nonce', 'security');
 
-    $playlist = isset($_POST['playlist']) ? wp_unslash($_POST['playlist']) : '';
-    $video = isset($_POST['video']) ? wp_unslash($_POST['video']) : '';
+    $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
+    $video = isset($_POST['video']) ? esc_url_raw(wp_unslash($_POST['video'])) : '';
 
     $success = false;
 
@@ -249,12 +249,12 @@ function evp_edit_video_info() {
     // Nounce Verification.
     check_ajax_referer('evp-admin-ajax-nonce', 'security');
 
-    $playlist = isset($_POST['playlist']) ? wp_unslash($_POST['playlist']) : '';
-    $video = isset($_POST['video']) ? wp_unslash($_POST['video']) : '';
-    $title = isset($_POST['title']) ? wp_unslash($_POST['title']) : '';
-    $thumbnail = isset($_POST['thumb']) ? wp_unslash($_POST['thumb']) : '';
-    $author = isset($_POST['author']) ? wp_unslash($_POST['author']) : '';
-    $author_url = isset($_POST['author_url']) ? wp_unslash($_POST['author_url']) : '';
+    $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
+    $video = isset($_POST['video']) ? esc_url_raw(wp_unslash($_POST['video'])) : '';
+    $title = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
+    $thumbnail = isset($_POST['thumb']) ? esc_url_raw(wp_unslash($_POST['thumb'])) : '';
+    $author = isset($_POST['author']) ? sanitize_text_field(wp_unslash($_POST['author'])) : '';
+    $author_url = isset($_POST['author_url']) ? esc_url_raw(wp_unslash($_POST['author_url'])) : '';
 
     $success = false;
     $data = false;
@@ -297,8 +297,8 @@ function evp_save_playlist_sorting() {
     // Nounce Verification.
     check_ajax_referer('evp-admin-ajax-nonce', 'security');
 
-    $playlist = isset($_POST['playlist']) ? wp_unslash($_POST['playlist']) : '';
-    $videos = isset($_POST['videos']) ? wp_unslash($_POST['videos']) : '';
+    $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
+    $videos = isset($_POST['videos']) ? array_map('esc_url_raw', wp_unslash($_POST['videos'])) : '';
 
     $data = evp_get_data($playlist);
     $old_videos = isset($data['videos']) ? $data['videos'] : array();
