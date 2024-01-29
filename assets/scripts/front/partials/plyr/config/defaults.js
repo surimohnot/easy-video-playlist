@@ -63,7 +63,7 @@ const defaults = {
   iconUrl: '',
 
   // Blank video (used to prevent errors on source change)
-  blankVideo: 'https://cdn.plyr.io/static/blank.mp4',
+  blankVideo: '',
 
   // Quality default
   quality: {
@@ -206,7 +206,7 @@ const defaults = {
       api: 'https://noembed.com/embed?url=https://www.youtube.com/watch?v={0}',
     },
     googleIMA: {
-      sdk: 'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
+      sdk: '',
     },
   },
 
