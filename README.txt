@@ -27,6 +27,20 @@ Setting up the plugin is incredibly easy. There are only two fundamental steps t
 * Once you added widget or editor block to your page, you just need to select the playlist from the dropdown. That't it. Your playlist will be displayed immediately.
 * Playlist shortcode can be found in the "Playlist Info" section of the admin page. Just copy and paste in your text widget or shortcode block.
 
+== Privacy Policy and Terms of Use ==
+
+When using this plugin, please be aware of the following:
+
+1. **Third-Party Services**: This plugin relies on third-party services, specifically YouTube and Vimeo, for embedding videos and retrieving data. By using this plugin, you acknowledge and agree to the terms of service and privacy policies of these services.
+2. **Data Transmission**: When you use this plugin to display YouTube or Vimeo videos, data may be sent to and processed by YouTube and Vimeo. Please review their terms of service and privacy policies to understand how your data is handled.
+
+You can find the terms of service and privacy policies of YouTube and Vimeo at the following links:
+
+- YouTube Terms of Service: https://www.youtube.com/t/terms
+- YouTube Privacy Policy: https://policies.google.com/privacy
+- Vimeo Terms of Service: https://vimeo.com/terms
+- Vimeo Privacy Policy: https://vimeo.com/privacy
+
 == Installation ==
 
 Installing “Easy Video Playlist” can be done either by searching for “Podcast Player” via the “Plugins > Add New” screen in your WordPress dashboard, or by using the following steps:
