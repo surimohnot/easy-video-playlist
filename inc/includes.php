@@ -18,9 +18,10 @@ function evp_get_playlists() {
     $pl_index = evp_get_register();
     foreach ($pl_index as $key => $value) {
         $title = $value['bucket_title'];
-        $data = evp_get_data($key);
+        $key = sanitize_text_field( $key );
+        $data = evp_get_data( $key );
         $playlists[$key] = array(
-            'title'  => $title,
+            'title'  => esc_html( $title ),
             'videos' => isset($data['videos']) && $data['videos'] ? $data['videos'] : array(),
         );
     }
@@ -233,9 +234,10 @@ function evp_object_cache() {
 
 function evp_get_playlist_index() {
     $playlists = evp_get_playlists();
-    $plIndex = array('' => __('Select Playlist'));
+    $plIndex = array( '' => __( 'Select Playlist' ) );
     foreach ($playlists as $key => $value) {
-        $plIndex[$key] = isset($value['title']) ? $value['title'] : '';
+        $key = esc_html( $key );
+        $plIndex[ $key ] = isset( $value['title'] ) ? esc_html( $value['title'] ) : '';
     }
     return array_filter($plIndex);
 }
