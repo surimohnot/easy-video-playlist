@@ -72,7 +72,7 @@ function evp_render_player($atts) {
         return __('No playlist provided.', 'easy-video-playlist');
     }
 
-    $data = evp_get_data($playlist);
+    $data = evp_get_data($playlist, false);
     if (! $data) {
         return __('This playlist does not exist any more.', 'easy-video-playlist');
     }
@@ -102,7 +102,7 @@ function evp_render_player($atts) {
             </div>
             <div class="evp-playlist__loading"></div>
         </div>',
-        $playlist,
+        esc_attr( $playlist ),
         __( 'Load More', 'easy-video-playlist' ),
     );
 }

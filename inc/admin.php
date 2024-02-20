@@ -171,7 +171,7 @@ function evp_add_new_video() {
         if ( ! $object_id ) {
             $message = __('Video playlist does not exists.', 'evp_video_player');
         } else {
-            $playlist_data = evp_get_data($playlist);
+            $playlist_data = evp_get_data($playlist, false);
             $playlist_data = $playlist_data ? $playlist_data : array();
             $videos = isset($playlist_data['videos']) ? $playlist_data['videos'] : array();
             $is_video_exists = false;
@@ -219,7 +219,7 @@ function evp_delete_video() {
 
     $success = false;
 
-    $data = evp_get_data($playlist);
+    $data = evp_get_data($playlist, false);
     $videos = isset($data['videos']) ? $data['videos'] : array();
     foreach ($videos as $key => $video_data) {
         if ( isset($video_data['url']) && $video_data['url'] == $video ) {
@@ -259,7 +259,7 @@ function evp_edit_video_info() {
     $success = false;
     $data = false;
 
-    $ndata = evp_get_data($playlist);
+    $ndata = evp_get_data($playlist, false);
     $videos = isset($ndata['videos']) ? $ndata['videos'] : array();
     foreach ($videos as $key => $video_data) {
         if ( isset($video_data['url']) && $video_data['url'] == $video ) {
@@ -300,7 +300,7 @@ function evp_save_playlist_sorting() {
     $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
     $videos = isset($_POST['videos']) ? array_map('esc_url_raw', wp_unslash($_POST['videos'])) : '';
 
-    $data = evp_get_data($playlist);
+    $data = evp_get_data($playlist, false);
     $old_videos = isset($data['videos']) ? $data['videos'] : array();
     $new_videos = array();
 

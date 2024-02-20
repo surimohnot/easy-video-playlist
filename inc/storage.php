@@ -76,10 +76,11 @@ function evp_delete_bucket($key) {
  */
 function evp_add_to_index( $key, $post_id, $label ) {
     $register = evp_get_register();
+    $key = sanitize_text_field( $key );
     $register[ $key ] = array(
         'bucket_key'   => $key,
-        'bucket_title' => $label,
-        'object_id'    => $post_id
+        'bucket_title' => sanitize_text_field( $label ),
+        'object_id'    => absint( $post_id )
     );
     update_option( 'evp-register', $register, false );
     return true;
@@ -120,15 +121,46 @@ function evp_get_data_index($key = '', $field = '') {
  *
  * @since 1.0.0
  *
- * @param string $key  ID or key of the storage bucket.
- * @param string $name Data to retrieve from the bucket.
+ * @param string $key     ID or key of the storage bucket.
+ * @param bool   $escape  Escape or not.
  */
-function evp_get_data( $key, $name = 'default_data' ) {
+function evp_get_data( $key, $escape = true ) {
     $object_id = evp_get_data_index( $key, 'object_id' );
     if ( $object_id ) {
-        return get_post_meta( $object_id, $name, true );
+        if ( $escape ) {
+            return evp_escape_playlist( get_post_meta( $object_id, 'default_data', true ) );
+        }
+        return get_post_meta( $object_id, 'default_data', true );
     }
     return false;
+}
+
+/**
+ * Escape data.
+ *
+ * @since 1.0.0
+ *
+ * @param string $data Playlist Data to be escaped.
+ */
+function evp_escape_playlist( $data ) {
+    if ( ! $data || ! is_array( $data ) ) {
+        return false;
+    }
+    $escaped_data = array();
+    $videos = isset( $data['videos'] ) ? $data['videos'] : array();
+    foreach( $videos as $video_data ) {
+        $escaped_data[] = array(
+            'title'         => isset( $video_data['title'] ) ? esc_html( $video_data['title'] ) : '',
+            'url'           => isset( $video_data['url'] ) ? esc_url( $video_data['url'] ) : '',
+            'type'          => isset( $video_data['type'] ) ? esc_html( $video_data['type'] ) : '',
+            'provider'      => isset( $video_data['provider'] ) ? esc_html( $video_data['provider'] ) : '',
+            'author_name'   => isset( $video_data['author_name'] ) ? esc_html( $video_data['author_name'] ) : '',
+            'author_url'    => isset( $video_data['author_url'] ) ? esc_url( $video_data['author_url'] ) : '',
+            'thumbnail_url' => isset( $video_data['thumbnail_url'] ) && is_array( $video_data['thumbnail_url'] ) ? array_map( 'esc_url', $video_data['thumbnail_url'] ) : array(),
+            'id'            => isset( $video_data['id'] ) ? esc_html( $video_data['id'] ) : '',
+        );
+    }
+    return array( 'videos' => $escaped_data );
 }
 
 /**
