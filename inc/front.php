@@ -8,6 +8,8 @@
  * @package WP_Video_Player
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Enqueue front-end scripts and styles for the playlist.
  *

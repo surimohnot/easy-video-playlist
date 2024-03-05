@@ -8,6 +8,8 @@
  * @package Easy_Video_Playlist
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Add and manage admin page for the plugin.
  *
