@@ -14,17 +14,17 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
     <div class="evp-playlists-sidebar">
         <div class="evp-playlists-index" style="display: none;">
             <fieldset class="evp-playlist-index">
-                <legend><?php _e( 'Your Playlists', 'easy-video-playlist' ); ?></legend>
+                <legend><?php esc_html_e( 'Your Playlists', 'easy-video-playlist' ); ?></legend>
                 <ul class="evp-playlists-index-list"></ul>
             </fieldset>
         </div>
         <div class="evp-playlists-create">
             <fieldset class="evp-create-new">
-                <legend><?php _e( 'Create New Playlist', 'easy-video-playlist' ); ?></legend>
+                <legend><?php esc_html_e( 'Create New Playlist', 'easy-video-playlist' ); ?></legend>
                 <input type="text" class="evp-playlist-name" placeholder="<?php _e( 'Enter Name of Your New Playlist', 'easy-video-playlist' ); ?>">
                 <button class="evp-add-playlist-btn">
                     <span class="dashicons dashicons-plus-alt"></span>
-                    <span><?php _e( 'Add Playlist', 'easy-video-playlist' ); ?></span>
+                    <span><?php esc_html_e( 'Add Playlist', 'easy-video-playlist' ); ?></span>
                 </button>
             </fieldset>
         </div>
@@ -45,19 +45,19 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
                 <div class="evp-playlist-content-video-list evp-playlist-tab-content">
                     <button class="evp-open-addvideo-modal">
                         <span class="dashicons dashicons-plus-alt"></span>
-                        <span><?php _e( 'Add Video to Playlist', 'easy-video-playlist' ); ?></span>
+                        <span><?php esc_html_e( 'Add Video to Playlist', 'easy-video-playlist' ); ?></span>
                     </button>
                     <div class="evp-playlist-video-index">
                         <ul class="evp-video-index-list"></ul>
                     </div>
                     <button class="evp-save-playlist-sorting">
                         <span class="dashicons dashicons-update"></span>
-                        <span><?php _e( 'Update Order', 'easy-video-playlist' ); ?></span>
+                        <span><?php esc_html_e( 'Update Order', 'easy-video-playlist' ); ?></span>
                     </button>
                 </div>
                 <div class="evp-playlist-content-info evp-playlist-tab-content" style="display: none;">
                     <div class="evp-playlist-shortcode-info">
-                        <span class="evp-playlist-info-title"><?php _e( 'Shortcode for this playlist', 'easy-video-playlist' ); ?></span>
+                        <span class="evp-playlist-info-title"><?php esc_html_e( 'Shortcode for this playlist', 'easy-video-playlist' ); ?></span>
                         <pre class="evp-playlist-shortcode"></pre>
                     </div>
                 </div>
@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
         </div>
         <div class="evp-video-modal" style="display: none;"></div>
         <div class="evp-playlists-no-content">
-            <h2 class="evp-playlists-no-content-title"><?php _e( 'Welcome to Easy Video Playlist', 'easy-video-playlist' ); ?></h2>
+            <h2 class="evp-playlists-no-content-title"><?php esc_html_e( 'Welcome to Easy Video Playlist', 'easy-video-playlist' ); ?></h2>
             <p>Create your first video playlist from the section on the left sidebar of this page OR <a href="<?php echo( esc_url( add_query_arg( 'tab', 'support', $admin_url ) ) ); ?>">check how to get started</a>.</p>
         </div>
     </div>
