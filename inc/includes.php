@@ -35,12 +35,13 @@ function evp_get_playlists() {
  */
 function evp_get_admin_i18n() {
     return array(
-        'vidurl'      => __( 'Enter URL of the Video', 'easy-video-playlist' ),
+        'vidurl'      => __( 'Enter URL of the Video, Playlist or Channel', 'easy-video-playlist' ),
         'videourl'    => __( 'Video URL', 'easy-video-playlist' ),
         'title'       => __( 'Title', 'easy-video-playlist' ),
-        'author'      => __( 'Author', 'easy-video-playlist' ),
-        'authorurl'   => __( 'Author URL', 'easy-video-playlist' ),
+        'channel'     => __( 'Channel', 'easy-video-playlist' ),
+        'channelurl'  => __( 'Channel URL', 'easy-video-playlist' ),
         'thumbnail'   => __( 'Thumbnail Image URL', 'easy-video-playlist' ),
+        'exshorts'    => __( 'Exclude Shorts (Videos shorter than 60 Seconds)', 'easy-video-playlist' ),
         'addvid'      => __( 'Add Video', 'easy-video-playlist' ),
         'update'      => __( 'Update', 'easy-video-playlist' ),
         'cancel'      => __( 'Cancel', 'easy-video-playlist' ),
@@ -64,6 +65,7 @@ function evp_get_oembed_data($url) {
     $provider_url = $provider[0];
     $provider_type = $provider[1];
     $service = $provider[2];
+    $id = isset( $provider[3] ) ? $provider[3] : '';
 
     // If the URL is a video URL, return the video data.
     if ('url' === $service) {
@@ -77,10 +79,46 @@ function evp_get_oembed_data($url) {
         );
         $user = wp_get_current_user();
         if ($user) {
-            $data['author_name'] = $user->display_name;
-            $data['author_url']  = $user->user_url;
+            $data['channel_name'] = $user->display_name;
+            $data['channel_url']  = $user->user_url;
         }
         return $data;
+    }
+
+    // If API keys are available, let's use them to get the video data.
+    $api = get_option( 'evp_settings_api' );
+    $api = $api && is_array( $api ) ? $api : array();
+    if ( isset( $api[ $service ] ) ) {
+        $api_key = $api[ $service ];
+        $items = array();
+        if ( 'youtube' === $service ) {
+            $api_url = "https://www.googleapis.com/youtube/v3/";
+            if ( 'video' === $provider_type ) {
+                $api_url .= "videos?part=snippet&key=$api_key&id=$id";
+            } else if ( 'playlist' === $provider_type ) {
+                $api_url .= "playlistItems?part=snippet&maxResults=40&key=$api_key&playlistId=$id";
+            } else if ( 'channel' === $provider_type ) {
+                $api_url .= "search?part=id&maxResults=40&key=$api_key&type=video&channelId=$id";
+            } else if ( 'channelUser' === $provider_type ) {
+                $get_id_url = "https://www.googleapis.com/youtube/v3/channels?part=id&key=$api_key&forHandle=$id";
+                $dataid = evp_get_remote_data($get_id_url);
+                if ( ! $dataid || ! is_array( $dataid ) || ! isset( $dataid['items'] ) || ! isset( $dataid['items'][0]['id'] ) ) {
+                    return false;
+                }
+                $channel_id = $dataid['items'][0]['id'];
+                $api_url .= "search?part=id&maxResults=40&key=$api_key&type=video&channelId=$channel_id";
+            }
+            $items = evp_get_youtube_video_items( $api_url, $provider_type, $api_key, $id );
+        }
+        if ( ! $items || empty( $items ) ) {
+            return false;
+        }
+        return $items;
+    }
+
+    // If API key is not available. We can only process video links.
+    if ( 'video' !== $provider_type ) {
+        return false;
     }
 
     // Add query parameters.
@@ -90,37 +128,109 @@ function evp_get_oembed_data($url) {
     );
 
     $final_url = add_query_arg($query_params, $provider_url);
-    $response = wp_safe_remote_request($final_url, array('timeout' => 10));
+    $data = evp_get_remote_data($final_url);
 
+	return $data ? evp_format_oembed_data($data, $url, $provider_type, $service, $id) : false;
+}
+
+function evp_get_youtube_video_items( $url, $provider_type, $api_key, $id, $max = 500 ) {
+    $items    = array();
+    $vidsInfo = array();
+    $data = evp_get_remote_data( $url );
+    if ( ! $data || ! is_array( $data ) || ! isset( $data['pageInfo'] ) || ! isset( $data['items'] ) ) {
+        return false;
+    }
+    $itemsinfo = evp_get_yt_video_information( $data['items'], $provider_type, $api_key );
+    $items = array_merge( $items, $itemsinfo );
+    $next_page_token = isset( $data['nextPageToken'] ) && $data['nextPageToken'] ? $data['nextPageToken'] : false;
+    while ( count( $items ) < $max && $next_page_token ) {
+        $url  .= '&pageToken=' . $next_page_token;
+        $data = evp_get_remote_data( $url );
+        if ( ! $data || ! is_array( $data ) || ! isset( $data['pageInfo'] ) || ! isset( $data['items'] ) ) {
+            break;
+        }
+        $itemsinfo = evp_get_yt_video_information( $data['items'], $provider_type, $api_key );
+        $items = array_merge( $items, $itemsinfo );
+        $next_page_token = isset( $data['nextPageToken'] ) && $data['nextPageToken'] ? $data['nextPageToken'] : false;
+    }
+    foreach ( $items as $item ) {
+        $vidsInfo[] = array(
+            'title'         => isset( $item['snippet']['title'] ) ? sanitize_text_field( $item['snippet']['title'] ) : '',
+            'date'          => isset( $item['snippet']['publishedAt'] ) ? sanitize_text_field( $item['snippet']['publishedAt'] ) : '',
+            'thumbnail_url' => isset( $item['snippet']['thumbnails']['high']['url'] ) ? array( esc_url_raw( $item['snippet']['thumbnails']['high']['url'] ) ) : array(),
+            'tags'          => isset( $item['snippet']['tags'] ) ? sanitize_text_field( $item['snippet']['tags'] ) : '',
+            'channel_name'  => isset( $item['snippet']['channelTitle'] ) ? sanitize_text_field( $item['snippet']['channelTitle'] ) : '',
+            'channel_url'   => isset( $item['snippet']['channelId'] ) ? 'https://www.youtube.com/channel/' . sanitize_text_field( $item['snippet']['channelId'] ) : '',
+            'channel_id'    => isset( $item['snippet']['channelId'] ) ? sanitize_text_field( $item['snippet']['channelId'] ) : '',
+            'duration'      => isset( $item['contentDetails']['duration'] ) ? sanitize_text_field( $item['contentDetails']['duration'] ) : '',
+            'uploadStatus'  => isset( $item['status']['uploadStatus'] ) ? sanitize_text_field( $item['status']['uploadStatus'] ) : '',
+            'privacyStatus' => isset( $item['status']['privacyStatus'] ) ? sanitize_text_field( $item['status']['privacyStatus'] ) : '',
+            'viewCount'     => isset( $item['statistics']['viewCount'] ) ? absint( $item['statistics']['viewCount'] ) : '',
+            'likeCount'     => isset( $item['statistics']['likeCount'] ) ? absint( $item['statistics']['likeCount'] ) : '',
+            'commentCount'  => isset( $item['statistics']['commentCount'] ) ? absint( $item['statistics']['commentCount'] ) : '',
+            'url'           => isset( $item['id'] ) ? 'https://www.youtube.com/watch?v=' . sanitize_text_field( $item['id'] ) : '',
+            'provider'      => 'youtube',
+            'type'          => sanitize_text_field( $provider_type ),
+            'source'        => sanitize_text_field( $id ),
+            'id'            => isset( $item['id'] ) ? sanitize_text_field( $item['id'] ) : '',
+        );
+    }
+    return $vidsInfo;
+}
+
+function evp_get_yt_video_information( $items, $provider_type, $api_key ) {
+    $id_string = '';
+    foreach ( $items as $item ) {
+        if ( strpos( $provider_type, 'channel' ) !== false ) {
+            $vid_id = isset( $item['id']['videoId'] ) ? $item['id']['videoId'] : '';
+        } else if ( strpos( $provider_type, 'video' ) !== false ) {
+            $vid_id = isset( $item['id'] ) ? $item['id'] : '';
+        } else {
+            $snippet = $item['snippet'] ? $item['snippet'] : array();
+            $vid_id  = isset( $snippet['resourceId']['videoId'] ) ? $snippet['resourceId']['videoId'] : '';
+        }
+        if ( ! $vid_id ) {
+            continue;
+        }
+        $id_string .= $vid_id . ',';
+    }
+    if ( ! $id_string ) {
+        return array();
+    }
+    $video_api_url = "https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&key=$api_key&id=$id_string";
+    $video_data = evp_get_remote_data($video_api_url);
+    return isset( $video_data['items'] ) ? $video_data['items'] : array();
+}
+
+function evp_get_remote_data($url) {
+    $response = wp_safe_remote_request($url, array('timeout' => 10));
     if ( 501 === wp_remote_retrieve_response_code( $response ) ) {
         return false;
     }
-
-	$response_body = wp_remote_retrieve_body( $response );
-	if ( ! $response_body ) {
-		return false;
-	}
-
+    $response_body = wp_remote_retrieve_body( $response );
+    if ( ! $response_body ) {
+        return false;
+    }
     $data = json_decode( trim( $response_body ), true );
     if (! $data) {
         return false;
     }
-
-	return $data ? evp_format_oembed_data($data, $url, $provider_type, $service) : false;
+    return $data;
 }
 
-function evp_format_oembed_data($data, $url, $provider_type, $service) {
+function evp_format_oembed_data($data, $url, $provider_type, $service, $id) {
     if (! $data || ! is_array($data)) {
         return false;
     }
 
-    $id = '';
     $thumb_url = array();
     if ('youtube' === $service) {
         // Try to fetch video ID from the youtube URL.
-        $id_regex = '%(?:youtube(?:-nocookie)?.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=|shorts/|playlist?list=)|youtu.be/)([^"&?/ ]{11})%i';
-        if (preg_match($id_regex, $url, $matches)) {
-            $id = $matches[1];
+        if ( ! $id ) {
+            $id_regex = '%(?:youtube(?:-nocookie)?.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=|shorts/|playlist?list=)|youtu.be/)([^"&?/ ]{11})%i';
+            if (preg_match($id_regex, $url, $matches)) {
+                $id = $matches[1];
+            }
         }
 
         // Get youtube image URL.
@@ -140,16 +250,17 @@ function evp_format_oembed_data($data, $url, $provider_type, $service) {
         }
     }
 
-    return array(
+    return array( array(
         'title'         => isset( $data['title'] ) ? sanitize_text_field( $data['title'] ) : '',
         'url'           => esc_url_raw( $url ),
         'type'          => $provider_type,
         'provider'      => $service,
-        'author_name'   => isset( $data['author_name'] ) ? sanitize_text_field( $data['author_name'] ) : '',
-        'author_url'    => isset( $data['author_url'] ) ? esc_url_raw( $data['author_url'] ) : '',
+        'channel_name'  => isset( $data['channel_name'] ) ? sanitize_text_field( $data['channel_name'] ) : '',
+        'channel_url'   => isset( $data['channel_url'] ) ? esc_url_raw( $data['channel_url'] ) : '',
         'thumbnail_url' => $thumb_url,
-        'id'            => $id,
-    );
+        'id'            => sanitize_text_field( $id ),
+        'source'        => esc_url_raw( $url ),
+    ) );
 }
 
 function evp_is_image_exists($image_url) {
@@ -183,18 +294,36 @@ function evp_is_image_exists($image_url) {
  * @since 1.0.0
  */
 function evp_get_oembed_providers($url) {
-    $providers = array(
-        '#https?://((m|www)\.)?youtube\.com/watch.*#i'    => array( 'https://www.youtube.com/oembed', 'video', 'youtube' ),
-		'#https?://((m|www)\.)?youtube\.com/playlist.*#i' => array( 'https://www.youtube.com/oembed', 'playlist', 'youtube' ),
-		'#https?://((m|www)\.)?youtube\.com/shorts/*#i'   => array( 'https://www.youtube.com/oembed', 'short', 'youtube' ),
-		'#https?://((m|www)\.)?youtube\.com/live/*#i'     => array( 'https://www.youtube.com/oembed', 'live', 'youtube' ),
-		'#https?://youtu\.be/.*#i'                        => array( 'https://www.youtube.com/oembed', 'video', 'youtube' ),
-        '#https?://(.+\.)?vimeo\.com/.*#i'                => array( 'https://vimeo.com/api/oembed.json', 'video', 'vimeo' ),
-    );
 
-    foreach ($providers as $pattern => $provider) {
+    // Check if the URL provider is youtube.
+    $patterns = array(
+        '/youtube\.com\/(?:watch\?v=|embed\/|v\/)([\w-]+)(?:$|&(?!list=))/i' => 'video', // Single video URL without list attribute
+        '/youtu\.be\/([\w-]+)/i' => 'video',
+        '/youtube\.com\/playlist\?list=([\w-]+)/i' => 'playlist', // Playlist URL format 1
+        '/youtube\.com\/watch\?v=[\w-]+&list=([\w-]+)/i' => 'playlist', // Playlist URL format 2
+        '/youtube\.com\/(?:channel|c)\/([\w-]+)/i' => 'channel', // Channel URL
+        '/youtube\.com\/user\/([\w-]+)/i' => 'user', // User page URL
+        '/youtube\.com\/@([\w-]+)/i' => 'channelUser' // Channel page URL with '@'
+    );
+    foreach ($patterns as $pattern => $type) {
         if (preg_match($pattern, $url, $matches)) {
-            return $provider;
+            $id = isset($matches[1]) ? $matches[1] : '';
+            return array('https://www.youtube.com/oembed', $type, 'youtube', $id);
+        }
+    }
+
+    $patterns = array(
+        '/vimeo\.com\/(\d+)/i' => 'video', // Vimeo video URL
+        '/vimeo\.com\/channels\/([\w-]+)/i' => 'channel', // Vimeo channel URL
+        '/vimeo\.com\/album\/(\d+)/i' => 'album', // Vimeo album URL
+        '/vimeo\.com\/showcase\/(\d+)/i' => 'showcase', // Vimeo showcase URL
+        '/vimeo\.com\/user\/([\w-]+)/i' => 'user', // Vimeo user URL
+        '/vimeo\.com\/groups\/([\w-]+)/i' => 'group', // Vimeo group URL
+    );
+    foreach ($patterns as $pattern => $type) {
+        if (preg_match($pattern, $url, $matches)) {
+            $id = isset($matches[1]) ? $matches[1] : '';
+            return array('https://vimeo.com/api/oembed.json', $type, 'vimeo', $id);
         }
     }
 

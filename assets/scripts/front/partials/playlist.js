@@ -35,19 +35,19 @@ class Playlist {
             if (! video.url) {
                 return;
             }
-            let author = '';
+            let channel = '';
             let image = '';
             if (Array.isArray(video.thumbnail_url) && video.thumbnail_url.length && video.thumbnail_url[0]) {
                 image = `<img src="${video.thumbnail_url[0]}" alt="${video.title}" />`;
             }
-            if (video.author_name) {
-                if (video.author_url) {
-                    author = `<a href="${video.author_url}" target="_blank">${video.author_name}</a>`;
+            if (video.channel_name) {
+                if (video.channel_url) {
+                    channel = `<a href="${video.channel_url}" target="_blank">${video.channel_name}</a>`;
                 } else {
-                    author = video.author_name;
+                    channel = video.channel_name;
                 }
             }
-            author = author ? `<div class="evp-playlist-video__meta">${author}</div>` : '';
+            channel = channel ? `<div class="evp-playlist-video__meta">${channel}</div>` : '';
             return `
             <div class="evp-playlist-video-index-item" data-video-id="${video.id}">
                 <div class="evp-playlist-video__image">
@@ -55,7 +55,7 @@ class Playlist {
                 </div>
                 <div class="evp-playlist-video__content">
                     <div class="evp-playlist-video__title">${video.title}</div>
-                    ${author}
+                    ${channel}
                 </div>
             </div>
             `;
@@ -68,7 +68,7 @@ class Playlist {
             </div>
             <div class="evp-single-video__header">
                 <div class="evp-single-video__title">${first.title}</div>
-                <div class="evp-single-video__meta"><a href="${first.author_url}" target="_blank">${first.author_name}</a></div>
+                <div class="evp-single-video__meta"><a href="${first.channel_url}" target="_blank">${first.channel_name}</a></div>
             </div>
         </div>
         `;
@@ -145,7 +145,7 @@ class Playlist {
         const header = `
         <div class="evp-single-video__header">
             <div class="evp-single-video__title">${video.title}</div>
-            <div class="evp-single-video__meta"><a href="${video.author_url}" target="_blank">${video.author_name}</a></div>
+            <div class="evp-single-video__meta"><a href="${video.channel_url}" target="_blank">${video.channel_name}</a></div>
         </div>`;
         this.playlistContainer.find('.evp-single-video__header').replaceWith(header);
         if ('url' === video.provider) {

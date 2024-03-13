@@ -33,6 +33,9 @@ function evp_register_admin_page() {
     add_action(
         'admin_print_scripts-' . $suffix,
         function() {
+            $api = get_option( 'evp_settings_api' );
+            $api = $api && is_array( $api ) ? $api : array();
+            $yt_api_key = isset( $api[ 'youtube' ] ) && $api[ 'youtube' ] ? true : false;
             wp_enqueue_script(
                 'evp-admin',
                 EVP_URL . 'assets/scripts/admin/admin.build.js',
@@ -52,6 +55,8 @@ function evp_register_admin_page() {
                         'security'      => wp_create_nonce( 'evp-admin-ajax-nonce' ),
                         'videoPlaylist' => evp_get_playlists(),
                         'i18n'          => evp_get_admin_i18n(),
+                        'api'           => array( 'youtube' => $yt_api_key ),
+                        'setpage'       => esc_url( add_query_arg( 'tab', 'settings', admin_url( 'admin.php?page=evp_settings' ) ) ),
                     )
                 )
             );
@@ -187,11 +192,13 @@ function evp_add_new_video() {
                 $message = __('Video already exists.', 'evp_video_player');
             } else {
                 $video_data = evp_get_oembed_data($video);
-                $playlist_data['videos'][] = $video_data;
-                $playlist_data['videos'] = array_filter($playlist_data['videos']);
-                evp_update_data($playlist, $playlist_data);
-                $success = true;
-                $data    = evp_get_playlists();
+                if ( $video_data ) {
+                    $playlist_data['videos'] = array_merge( $videos, $video_data );
+                    $playlist_data['videos'] = array_filter($playlist_data['videos']);
+                    evp_update_data($playlist, $playlist_data);
+                    $success = true;
+                    $data    = evp_get_playlists();
+                }
             }
         }
     }
@@ -255,8 +262,8 @@ function evp_edit_video_info() {
     $video = isset($_POST['video']) ? esc_url_raw(wp_unslash($_POST['video'])) : '';
     $title = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
     $thumbnail = isset($_POST['thumb']) ? esc_url_raw(wp_unslash($_POST['thumb'])) : '';
-    $author = isset($_POST['author']) ? sanitize_text_field(wp_unslash($_POST['author'])) : '';
-    $author_url = isset($_POST['author_url']) ? esc_url_raw(wp_unslash($_POST['author_url'])) : '';
+    $channel = isset($_POST['channel']) ? sanitize_text_field(wp_unslash($_POST['channel'])) : '';
+    $channel_url = isset($_POST['channel_url']) ? esc_url_raw(wp_unslash($_POST['channel_url'])) : '';
 
     $success = false;
     $data = false;
@@ -269,8 +276,8 @@ function evp_edit_video_info() {
             array_unshift($thumb_url, esc_url_raw($thumbnail));
             $video_data['title'] = sanitize_text_field($title);
             $video_data['thumbnail_url'] = $thumb_url;
-            $video_data['author_name'] = sanitize_text_field($author);
-            $video_data['author_url'] = esc_url_raw($author_url);
+            $video_data['channel_name'] = sanitize_text_field($channel);
+            $video_data['channel_url'] = esc_url_raw($channel_url);
             $videos[$key] = $video_data;
             $ndata['videos'] = $videos;
             evp_update_data($playlist, $ndata);
@@ -324,6 +331,29 @@ function evp_save_playlist_sorting() {
 add_action('wp_ajax_evp_save_playlist_sorting', 'evp_save_playlist_sorting');
 
 /**
+ * Save API Key to database.
+ *
+ * @since 1.0.0
+ */
+function evp_save_api_key() {
+    // Nounce Verification.
+    check_ajax_referer('evp-admin-ajax-nonce', 'security');
+    $key = isset($_POST['api_key']) ? sanitize_text_field(wp_unslash($_POST['api_key'])) : '';
+    $val = isset($_POST['api_val']) ? sanitize_text_field(wp_unslash($_POST['api_val'])) : '';
+    $api = get_option( 'evp_settings_api' );
+    $api = $api && is_array( $api ) ? $api : array();
+    $api[ $key ] = $val;
+    update_option( 'evp_settings_api', $api );
+    echo wp_json_encode(
+        array(
+            'success' => true,
+        )
+    );
+    wp_die();
+}
+add_action('wp_ajax_evp_save_api_key', 'evp_save_api_key');
+
+/**
  * Register the Video Playlist block.
  *
  * @since 1.0.0
@@ -345,7 +375,7 @@ function evp_register_block() {
         )
     );
 
-    add_shortcode( 'evpideoplaylist', 'evp_render_player' );
+    add_shortcode( 'evpvideoplaylist', 'evp_render_player' );
 }
 add_action( 'init', 'evp_register_block' );
 

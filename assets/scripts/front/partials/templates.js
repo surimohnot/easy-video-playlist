@@ -24,13 +24,13 @@ function addVideoEditForm() {
             <label for="evp-edit-video-thumb">{9}</label>
             <input type="text" id="evp-edit-video-thumb" value="{10}">
         </div>
-        <div class="evp-edit-video-author evp-edit-video-form-elem">
-            <label for="evp-edit-video-author">{5}</label>
-            <input type="text" id="evp-edit-video-author" value="{6}">
+        <div class="evp-edit-video-channel evp-edit-video-form-elem">
+            <label for="evp-edit-video-channel">{5}</label>
+            <input type="text" id="evp-edit-video-channel" value="{6}">
         </div>
-        <div class="evp-edit-video-author-url evp-edit-video-form-elem">
-            <label for="evp-edit-video-author-url">{7}</label>
-            <input type="text" id="evp-edit-video-author-url" value="{8}">
+        <div class="evp-edit-video-channel-url evp-edit-video-form-elem">
+            <label for="evp-edit-video-channel-url">{7}</label>
+            <input type="text" id="evp-edit-video-channel-url" value="{8}">
         </div>
         <button class="evp-save-edit-info-btn">
             <span class="dashicons dashicons-update"></span>

@@ -12,6 +12,7 @@ class Playlist {
     constructor() {
         this.playListItems = vars.playList || {};
         this.listManager = jQuery("#evp-playlist-manager");
+        this.api = vars.api || {};
     }
 
     init() {
@@ -94,7 +95,7 @@ class Playlist {
             this.listManager.find('.evp-video-index-list').sortable('refresh');
             container.show();
             this.listManager.find('.evp-playlists-no-content').hide();
-            container.find('.evp-playlist-shortcode').html('[evpideoplaylist playlist="' + firstPlaylistKey + '"]');
+            container.find('.evp-playlist-shortcode').html('[evpvideoplaylist playlist="' + firstPlaylistKey + '"]');
         } else {
             const container = this.listManager.find('.evp-playlists-content');
             container.find('.evp-playlist-title-text').empty();
@@ -168,10 +169,10 @@ class Playlist {
                 videoData.url,
                 i18n.title,
                 videoData.title,
-                i18n.author,
-                videoData.author_name,
-                i18n.authorurl,
-                videoData.author_url,
+                i18n.channel,
+                videoData.channel_name,
+                i18n.channelurl,
+                videoData.channel_url,
                 i18n.thumbnail,
                 thumbUrl,
                 i18n.update,
@@ -202,11 +203,31 @@ class Playlist {
             return;
         }
 
+        const urlType = this.analyseUrl( url );
+        if (!urlType) {
+            console.log('Please enter a valid video URL.');
+            return;
+        }
+
+        const { provider, type, id } = urlType;
         const videos = this.playListItems[playList]?.['videos'] ?? [];
-        for (let i = 0; i < videos.length; i++) {
-            if (videos[i][url] === url) {
-                console.log('Video already exists.');
-                return;
+        if (type !== 'video') {
+            if ( 'youtube' === provider && ! this.api['youtube'] ) {
+                console.log('Please add your YouTube API key.');
+                if ( vars.setpage ) {
+                    window.location.href = vars.setpage;
+                }
+                return; // TODO: Show an error message and reload to api setting page.
+            } else if ( 'vimeo' === provider && ! this.api['vimeo'] ) {
+                console.log('Please add your Vimeo API key.');
+                return; // TODO: Show an error message and reload to api setting page.
+            }
+        } else {
+            for (let i = 0; i < videos.length; i++) {
+                if (videos[i][url] === url) {
+                    console.log('Video already exists.');
+                    return;
+                }
             }
         }
 
@@ -215,6 +236,9 @@ class Playlist {
             security: vars.security,
             playlist: playList,
             videourl: url,
+            videotype: type,
+            videoid: id,
+            videoprovider: provider,
         };
         jQuery.post(vars.ajaxUrl, data, (response) => {
             if (response.success) {
@@ -234,6 +258,57 @@ class Playlist {
             }
             this.listManager.find('.evp-video-url').val('');
         }, 'json');
+    }
+
+    analyseUrl( url ) {
+        // Patterns for YouTube URLs
+        const youtubePatterns = [
+            { pattern: /youtube\.com\/(?:watch\?v=|embed\/|v\/)([\w-]+)(?:$|&(?!list=))/i, type: 'video' }, // Single video URL without list attribute
+            { pattern: /youtu\.be\/([\w-]+)/i, type: 'video' },
+            { pattern: /youtube\.com\/playlist\?list=([\w-]+)/i, type: 'playlist' }, // Playlist URL format 1
+            { pattern: /youtube\.com\/watch\?v=[\w-]+&list=([\w-]+)/i, type: 'playlist' }, // Playlist URL format 2
+            { pattern: /youtube\.com\/(?:channel|c)\/([\w-]+)/i, type: 'channel' }, // Channel URL
+            { pattern: /youtube\.com\/user\/([\w-]+)/i, type: 'user' }, // User page URL
+            { pattern: /youtube\.com\/@([\w-]+)/i, type: 'channelUser' } // Channel page URL with '@'
+        ];
+
+        // Patterns for Vimeo URLs
+        const vimeoPatterns = [
+            { pattern: /vimeo\.com\/(\d+)/i, type: 'video' }, // Vimeo video URL
+            { pattern: /vimeo\.com\/channels\/([\w-]+)/i, type: 'channel' }, // Vimeo channel URL
+            { pattern: /vimeo\.com\/album\/(\d+)/i, type: 'album' }, // Vimeo album URL
+            { pattern: /vimeo\.com\/showcase\/(\d+)/i, type: 'showcase' }, // Vimeo showcase URL
+            { pattern: /vimeo\.com\/user\/([\w-]+)/i, type: 'user' }, // Vimeo user URL
+            { pattern: /vimeo\.com\/groups\/([\w-]+)/i, type: 'group' } // Vimeo group URL
+        ];
+
+        // Check YouTube URL patterns
+        for (const { pattern, type } of youtubePatterns) {
+            const matches = url.match(pattern);
+            if (matches) {
+                const id = matches[1] || '';
+                return { provider: 'youtube', type, id };
+            }
+        }
+
+        // Check YouTube URL patterns
+        for (const { pattern, type } of vimeoPatterns) {
+            const matches = url.match(pattern);
+            if (matches) {
+                const id = matches[1] || '';
+                return { provider: 'vimeo', type, id };
+            }
+        }
+
+        // Check if it's a video file URL
+        const videoExtensions = ['mp4', 'm4v', 'webm', 'ogv', 'flv'];
+        const urlParts = url.split('?')[0].split('.'); // Split URL by '?' and '.', then get the last part
+        const fileExtension = urlParts[urlParts.length - 1].toLowerCase();
+        if (videoExtensions.includes(fileExtension)) {
+            return { provider: 'url', type: 'video', id: '' };
+        }
+
+        return false;
     }
 
     openPlaylist(e) {
@@ -297,8 +372,8 @@ class Playlist {
             video: url,
             title: modal.find('#evp-edit-video-title').val(),
             thumb: modal.find('#evp-edit-video-thumb').val(),
-            author: modal.find('#evp-edit-video-author').val(),
-            author_url: modal.find('#evp-edit-video-author-url').val(),
+            channel: modal.find('#evp-edit-video-channel').val(),
+            channel_url: modal.find('#evp-edit-video-channel-url').val(),
         };
         jQuery.post(vars.ajaxUrl, data, (response) => {
             if (response.success) {

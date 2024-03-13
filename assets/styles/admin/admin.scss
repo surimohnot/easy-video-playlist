@@ -24,6 +24,7 @@
         }
     }
     input[type='text'],
+    input[type='password'],
     input[type='url'],
     input[type='submit'],
     select {
@@ -114,7 +115,8 @@
     .evp-playlists-index {
         margin-bottom: 20px;
     }
-    .evp-play-list-item {
+    .evp-play-list-item,
+    .evp-settings-item {
         padding: 15px 18px;
         font-size: 15px;
         border: 1px solid #ccc;
@@ -148,6 +150,30 @@
         position: relative;
         max-width: 800px;
         margin: 60px auto 20px;
+    }
+    .evp-settings {
+        max-width: 1320px;
+        padding: 0 20px;
+        margin: 40px auto 0;
+        @media only screen and (min-width: 740px) {
+            &-wrapper {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+            &-sidebar {
+                width: 20%;
+            }
+            &-content {
+                width: calc(80% - 40px);
+                position: relative;
+                margin-bottom: 20px;
+                padding: 40px;
+                border: 1px solid #e6e6e6;
+                border-radius: 10px;
+                background-color: #fff;
+            }
+        }
     }
     .evp-playlist-title {
         display: flex;
@@ -279,7 +305,8 @@
         border-radius: 5px;
     }
     .evp-playlists-no-content,
-    .evp-support {
+    .evp-support,
+    .evp-settings {
         &,
         p {
             font-size: 15px;
@@ -320,5 +347,52 @@
             height: 100%;
             margin: 0;
         }
+    }
+    .evp-settings-api-title {
+        margin-top: 0;
+    }
+    .evp-settings-key-input {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        flex: 1;
+        button {
+            margin-left: 10px;
+            flex-basis: 30%;
+        }
+    }
+    .evp-settings-api-input-wrapper {
+        position: relative;
+        width: 100%;
+        input {
+            width: 100%;
+        }
+        button {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: transparent !important;
+            border-width: 0 !important;
+            padding: 10px !important;
+            color: #3582c4 !important;
+            .dashicons-hidden {
+                display: none;
+            }
+            &.toggled-on {
+                .dashicons-hidden {
+                    display: block;
+                }
+                .dashicons-visibility {
+                    display: none;
+                }
+            }
+        }
+    }
+    .evp-settings-key-info {
+        font-style: italic;
+        font-size: 15px;
+        margin: 0 0 0 5px;
+        color: #999;
     }
 }
