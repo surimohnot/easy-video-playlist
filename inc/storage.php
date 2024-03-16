@@ -156,8 +156,8 @@ function evp_escape_playlist( $data ) {
             'url'           => isset( $video_data['url'] ) ? esc_url( $video_data['url'] ) : '',
             'type'          => isset( $video_data['type'] ) ? esc_html( $video_data['type'] ) : '',
             'provider'      => isset( $video_data['provider'] ) ? esc_html( $video_data['provider'] ) : '',
-            'channel_name'   => isset( $video_data['channel_name'] ) ? esc_html( $video_data['channel_name'] ) : '',
-            'channel_url'    => isset( $video_data['channel_url'] ) ? esc_url( $video_data['channel_url'] ) : '',
+            'author_name'   => isset( $video_data['author_name'] ) ? esc_html( $video_data['author_name'] ) : '',
+            'author_url'    => isset( $video_data['author_url'] ) ? esc_url( $video_data['author_url'] ) : '',
             'thumbnail_url' => isset( $video_data['thumbnail_url'] ) && is_array( $video_data['thumbnail_url'] ) ? array_map( 'esc_url', $video_data['thumbnail_url'] ) : array(),
             'id'            => isset( $video_data['id'] ) ? esc_html( $video_data['id'] ) : '',
         );

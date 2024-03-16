@@ -262,8 +262,8 @@ function evp_edit_video_info() {
     $video = isset($_POST['video']) ? esc_url_raw(wp_unslash($_POST['video'])) : '';
     $title = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
     $thumbnail = isset($_POST['thumb']) ? esc_url_raw(wp_unslash($_POST['thumb'])) : '';
-    $channel = isset($_POST['channel']) ? sanitize_text_field(wp_unslash($_POST['channel'])) : '';
-    $channel_url = isset($_POST['channel_url']) ? esc_url_raw(wp_unslash($_POST['channel_url'])) : '';
+    $author = isset($_POST['author']) ? sanitize_text_field(wp_unslash($_POST['author'])) : '';
+    $author_url = isset($_POST['author_url']) ? esc_url_raw(wp_unslash($_POST['author_url'])) : '';
 
     $success = false;
     $data = false;
@@ -276,8 +276,8 @@ function evp_edit_video_info() {
             array_unshift($thumb_url, esc_url_raw($thumbnail));
             $video_data['title'] = sanitize_text_field($title);
             $video_data['thumbnail_url'] = $thumb_url;
-            $video_data['channel_name'] = sanitize_text_field($channel);
-            $video_data['channel_url'] = esc_url_raw($channel_url);
+            $video_data['author_name'] = sanitize_text_field($author);
+            $video_data['author_url'] = esc_url_raw($author_url);
             $videos[$key] = $video_data;
             $ndata['videos'] = $videos;
             evp_update_data($playlist, $ndata);

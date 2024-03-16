@@ -12,6 +12,7 @@ class Playlist {
     constructor() {
         this.playListItems = vars.playList || {};
         this.listManager = jQuery("#evp-playlist-manager");
+        this.feedback = jQuery('#evp-action-feedback');
         this.api = vars.api || {};
     }
 
@@ -54,6 +55,9 @@ class Playlist {
         this.listManager.find('.evp-video-index-list').on('click', '.evp-delete-video', this.deleteVideo.bind(this));
         this.listManager.find('.evp-save-playlist-sorting').on('click', this.savePlaylistSorting.bind(this));
         this.listManager.find('.evp-playlist-content-tabs-item').on('click', this.toggleTabs.bind(this));
+        this.feedback.on('click', '.evp-error-close', (e) => {
+			this.feedback.removeClass('evp-error');
+		})
     }
 
     renderPlaylistIndex(plKey) {
@@ -109,14 +113,13 @@ class Playlist {
     addNewPlaylist() {
         const name = this.listManager.find('.evp-playlist-name').val();
         if (!name) {
-            console.log('Please enter a playlist name.');
+            this.response('Please enter a playlist name.', 'evp-error');
             return;
         }
 
         const key = name.toLowerCase().replace(/\s/g, '-');
         if (this.playListItems[key]) {
-            console.log('Playlist already exists.');
-            // TODO: Activate the available playlist.
+            this.response('Playlist already exists.', 'evp-error');
             return;
         }
         const data = {
@@ -135,6 +138,7 @@ class Playlist {
                 }
                 this.render(key);
                 this.listManager.find('.evp-playlist-name').val('');
+                this.response('Playlist added successfully.', 'evp-success');
             }
         }, 'json');
     }
@@ -169,10 +173,10 @@ class Playlist {
                 videoData.url,
                 i18n.title,
                 videoData.title,
-                i18n.channel,
-                videoData.channel_name,
-                i18n.channelurl,
-                videoData.channel_url,
+                i18n.author,
+                videoData.author_name,
+                i18n.authorurl,
+                videoData.author_url,
                 i18n.thumbnail,
                 thumbUrl,
                 i18n.update,
@@ -199,13 +203,13 @@ class Playlist {
         const playList = container.attr('data-id');
         const url = this.listManager.find('.evp-video-url').val();
         if (!url) {
-            console.log('Please enter a video URL.');
+            this.response('Please enter a video URL.', 'evp-error');
             return;
         }
 
         const urlType = this.analyseUrl( url );
         if (!urlType) {
-            console.log('Please enter a valid video URL.');
+            this.response('Please enter a valid video URL.', 'evp-error');
             return;
         }
 
@@ -213,19 +217,21 @@ class Playlist {
         const videos = this.playListItems[playList]?.['videos'] ?? [];
         if (type !== 'video') {
             if ( 'youtube' === provider && ! this.api['youtube'] ) {
-                console.log('Please add your YouTube API key.');
+                this.response('Please add your YouTube API key.', 'evp-error');
                 if ( vars.setpage ) {
-                    window.location.href = vars.setpage;
+                    setTimeout(function() {
+                        window.location.href = vars.setpage;
+                    }.bind(this), 1000);
                 }
                 return; // TODO: Show an error message and reload to api setting page.
             } else if ( 'vimeo' === provider && ! this.api['vimeo'] ) {
-                console.log('Please add your Vimeo API key.');
+                this.response('Please add your Vimeo API key.', 'evp-error');
                 return; // TODO: Show an error message and reload to api setting page.
             }
         } else {
             for (let i = 0; i < videos.length; i++) {
                 if (videos[i][url] === url) {
-                    console.log('Video already exists.');
+                    this.response('Video already exists.', 'evp-error');
                     return;
                 }
             }
@@ -252,9 +258,11 @@ class Playlist {
                     if (vids.length > videos.length && lastVid.provider && 'url' === lastVid.provider) {
                         this.createEditVideoModal(lastVid);
                     }
+                    this.response('The Video has been added successfully.', 'evp-success');
                 }
             } else {
                 this.closeVideoModal();
+                this.response('This Video could not be added.', 'evp-error');
             }
             this.listManager.find('.evp-video-url').val('');
         }, 'json');
@@ -336,6 +344,7 @@ class Playlist {
                     this.closeVideoModal();
                     this.render();
                 }
+                this.response('Playlist Deleted Successfully.', 'evp-success');
             }
         }, 'json');
     }
@@ -355,6 +364,7 @@ class Playlist {
         jQuery.post(vars.ajaxUrl, data, (response) => {
             if (response.success) {
                 item.remove();
+                this.response('Video Deleted Successfully.', 'evp-success');
             }
         }, 'json');
     }
@@ -372,8 +382,8 @@ class Playlist {
             video: url,
             title: modal.find('#evp-edit-video-title').val(),
             thumb: modal.find('#evp-edit-video-thumb').val(),
-            channel: modal.find('#evp-edit-video-channel').val(),
-            channel_url: modal.find('#evp-edit-video-channel-url').val(),
+            author: modal.find('#evp-edit-video-author').val(),
+            author_url: modal.find('#evp-edit-video-author-url').val(),
         };
         jQuery.post(vars.ajaxUrl, data, (response) => {
             if (response.success) {
@@ -383,6 +393,7 @@ class Playlist {
                     this.closeVideoModal()
                     this.render();
                 }
+                this.response('Video data edited successfully.', 'evp-success');
             }
         }, 'json');
     }
@@ -403,6 +414,7 @@ class Playlist {
         jQuery.post(vars.ajaxUrl, data, (response) => {
             if (response.success) {
                 this.listManager.removeClass('evp-video-sorted');
+                this.response('Playlist Sorted Successfully.', 'evp-success');
             }
         }, 'json');
     }
@@ -423,5 +435,18 @@ class Playlist {
         this.listManager.find('.evp-playlist-content-tabs-item').removeClass('evp-tab-active').first().addClass('evp-tab-active');
         this.listManager.find('.evp-playlist-tab-content').hide().first().show();
     }
+
+	response(message = '', type = false) {
+		this.feedback.removeClass('evp-error evp-success evp-running');
+		if (false !== type) {
+			this.feedback.addClass(type);
+			this.feedback.find('.evp-feedback').text(message);
+		}
+
+		// Remove classes after 1.5 seconds
+		setTimeout(function() {
+			this.feedback.removeClass('evp-success evp-running');
+		}.bind(this), 1500);
+	}
 }
 export default Playlist;

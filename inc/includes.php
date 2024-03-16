@@ -8,6 +8,8 @@
  * @package Easy_Video_Playlist
  */
 
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 /**
  * Get all playlists from the storage.
  *
@@ -38,8 +40,8 @@ function evp_get_admin_i18n() {
         'vidurl'      => __( 'Enter URL of the Video, Playlist or Channel', 'easy-video-playlist' ),
         'videourl'    => __( 'Video URL', 'easy-video-playlist' ),
         'title'       => __( 'Title', 'easy-video-playlist' ),
-        'channel'     => __( 'Channel', 'easy-video-playlist' ),
-        'channelurl'  => __( 'Channel URL', 'easy-video-playlist' ),
+        'author'      => __( 'Channel', 'easy-video-playlist' ),
+        'authorurl'   => __( 'Channel URL', 'easy-video-playlist' ),
         'thumbnail'   => __( 'Thumbnail Image URL', 'easy-video-playlist' ),
         'exshorts'    => __( 'Exclude Shorts (Videos shorter than 60 Seconds)', 'easy-video-playlist' ),
         'addvid'      => __( 'Add Video', 'easy-video-playlist' ),
@@ -79,8 +81,8 @@ function evp_get_oembed_data($url) {
         );
         $user = wp_get_current_user();
         if ($user) {
-            $data['channel_name'] = $user->display_name;
-            $data['channel_url']  = $user->user_url;
+            $data['author_name'] = $user->display_name;
+            $data['author_url']  = $user->user_url;
         }
         return $data;
     }
@@ -159,9 +161,9 @@ function evp_get_youtube_video_items( $url, $provider_type, $api_key, $id, $max 
             'date'          => isset( $item['snippet']['publishedAt'] ) ? sanitize_text_field( $item['snippet']['publishedAt'] ) : '',
             'thumbnail_url' => isset( $item['snippet']['thumbnails']['high']['url'] ) ? array( esc_url_raw( $item['snippet']['thumbnails']['high']['url'] ) ) : array(),
             'tags'          => isset( $item['snippet']['tags'] ) ? sanitize_text_field( $item['snippet']['tags'] ) : '',
-            'channel_name'  => isset( $item['snippet']['channelTitle'] ) ? sanitize_text_field( $item['snippet']['channelTitle'] ) : '',
-            'channel_url'   => isset( $item['snippet']['channelId'] ) ? 'https://www.youtube.com/channel/' . sanitize_text_field( $item['snippet']['channelId'] ) : '',
-            'channel_id'    => isset( $item['snippet']['channelId'] ) ? sanitize_text_field( $item['snippet']['channelId'] ) : '',
+            'author_name'  => isset( $item['snippet']['channelTitle'] ) ? sanitize_text_field( $item['snippet']['channelTitle'] ) : '',
+            'author_url'   => isset( $item['snippet']['channelId'] ) ? 'https://www.youtube.com/channel/' . sanitize_text_field( $item['snippet']['channelId'] ) : '',
+            'author_id'    => isset( $item['snippet']['channelId'] ) ? sanitize_text_field( $item['snippet']['channelId'] ) : '',
             'duration'      => isset( $item['contentDetails']['duration'] ) ? sanitize_text_field( $item['contentDetails']['duration'] ) : '',
             'uploadStatus'  => isset( $item['status']['uploadStatus'] ) ? sanitize_text_field( $item['status']['uploadStatus'] ) : '',
             'privacyStatus' => isset( $item['status']['privacyStatus'] ) ? sanitize_text_field( $item['status']['privacyStatus'] ) : '',
@@ -223,7 +225,8 @@ function evp_format_oembed_data($data, $url, $provider_type, $service, $id) {
         return false;
     }
 
-    $thumb_url = array();
+    $thumb_url  = array();
+    $channel_id = '';
     if ('youtube' === $service) {
         // Try to fetch video ID from the youtube URL.
         if ( ! $id ) {
@@ -243,6 +246,7 @@ function evp_format_oembed_data($data, $url, $provider_type, $service, $id) {
         if (isset( $data['thumbnail_url'] )) {
             $thumb_url[] = esc_url_raw($data['thumbnail_url']);
         }
+
     } else if ('vimeo' === $service) {
         $id = isset( $data['video_id'] ) ? sanitize_text_field( $data['video_id'] ) : '';
         if (isset( $data['thumbnail_url'] )) {
@@ -252,14 +256,16 @@ function evp_format_oembed_data($data, $url, $provider_type, $service, $id) {
 
     return array( array(
         'title'         => isset( $data['title'] ) ? sanitize_text_field( $data['title'] ) : '',
+        'date'          => isset( $data['upload_date'] ) ? esc_url_raw( $data['upload_date'] ) : '',
+        'thumbnail_url' => $thumb_url,
         'url'           => esc_url_raw( $url ),
         'type'          => $provider_type,
         'provider'      => $service,
-        'channel_name'  => isset( $data['channel_name'] ) ? sanitize_text_field( $data['channel_name'] ) : '',
-        'channel_url'   => isset( $data['channel_url'] ) ? esc_url_raw( $data['channel_url'] ) : '',
-        'thumbnail_url' => $thumb_url,
+        'author_name'  => isset( $data['author_name'] ) ? sanitize_text_field( $data['author_name'] ) : '',
+        'author_url'   => isset( $data['author_url'] ) ? esc_url_raw( $data['author_url'] ) : '',
         'id'            => sanitize_text_field( $id ),
         'source'        => esc_url_raw( $url ),
+        'duration'      => isset( $data['duration'] ) ? absint( $data['duration'] ) : '',
     ) );
 }
 

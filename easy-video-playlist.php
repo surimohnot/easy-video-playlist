@@ -79,6 +79,7 @@ add_action(
 	function() {
 		load_plugin_textdomain( 'easy-video-playlist', false, dirname( EVP_BASENAME ) . '/lang' );
 		require_once EVP_DIR . 'inc/validation.php';
+		require_once EVP_DIR . 'inc/markup.php';
 		require_once EVP_DIR . 'inc/storage.php';
 		require_once EVP_DIR . 'inc/includes.php';
         require_once EVP_DIR . 'inc/admin.php';

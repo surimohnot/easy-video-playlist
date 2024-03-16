@@ -23,4 +23,11 @@ $active_tab = isset( $_GET['tab'] ) && array_key_exists( $_GET['tab'], $tabs ) ?
             <?php include_once evp_get_partial( $active_tab ); ?>
         </main>
     </div>
+    <div class="evp-action-feedback" id="evp-action-feedback">
+		<span class="dashicons dashicons-update"></span>
+		<span class="dashicons dashicons-no"></span>
+		<span class="dashicons dashicons-yes"></span>
+		<span class="evp-feedback"></span>
+		<span class="evp-error-close"><span class="dashicons dashicons-no"></span></span>
+	</div>
 </article>

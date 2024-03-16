@@ -56,6 +56,31 @@
 		margin: 0 !important;
 		padding: 0 !important;
 	}
+	
+	.icon {
+		position: relative;
+		top: -0.0625em;
+		display: inline-block;
+		width: 1em;
+		height: 1em;
+		vertical-align: middle;
+		stroke-width: 0;
+		stroke: currentColor;
+		fill: currentColor;
+	}
+}
+
+.evp__offscreen {
+	border: 0;
+	clip: rect( 1px, 1px, 1px, 1px );
+	clip-path: inset( 50% );
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	width: 1px;
+	word-wrap: normal;
 }
 
 .evp-playlist__wrapper {
