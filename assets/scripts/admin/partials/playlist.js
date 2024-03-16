@@ -223,10 +223,10 @@ class Playlist {
                         window.location.href = vars.setpage;
                     }.bind(this), 1000);
                 }
-                return; // TODO: Show an error message and reload to api setting page.
+                return;
             } else if ( 'vimeo' === provider && ! this.api['vimeo'] ) {
                 this.response('Please add your Vimeo API key.', 'evp-error');
-                return; // TODO: Show an error message and reload to api setting page.
+                return;
             }
         } else {
             for (let i = 0; i < videos.length; i++) {
