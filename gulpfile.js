@@ -109,6 +109,8 @@ gulp.task('build', gulp.series(
 			'!./webpack.config.js',
 			'!./assets/**/*.scss',
 			'!./assets/styles/partials',
+			'!./.gitignore',
+			'!./.babelrc',
 		])
 			.pipe(gulp.dest('./easy-video-playlist'));
 	},
