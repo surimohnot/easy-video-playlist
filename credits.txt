@@ -1,2 +1,8 @@
 == Resources ==
 * Plyr JavaScript Video Library https://plyr.io/, (c) [Sam Potts](https://twitter.com/sam_potts), [MIT](https://github.com/sampotts/plyr/blob/master/LICENSE.md)
+* Image in cover https://www.flickr.com/photos/44296132@N06/31536227935, (C) Bernd Thaller, [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/?ref=openverse)
+* Image in cover https://www.flickr.com/photos/132033298@N04/23368213790, (C) Charles Patrick Ewing, [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/?ref=openverse)
+* Image in cover https://www.flickr.com/photos/10134557@N08/2527625109, (C) Tiltti, [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/?ref=openverse)
+* Image in cover https://www.flickr.com/photos/124918242@N04/18264878994, (C) Schneidersphotography, [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/?ref=openverse)
+* Image in cover https://www.flickr.com/photos/29812986@N06/32444792346, (C) Torstenbehrens, [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/?ref=openverse)
+* Image in cover https://www.flickr.com/photos/93914647@N00/2753367745, (C) Skenmy, [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/?ref=openverse)

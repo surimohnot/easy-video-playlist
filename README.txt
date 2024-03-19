@@ -1,6 +1,6 @@
 === Video Gallery & playlist: Youtube, Vimeo and Self Hosted Videos ===
 Contributors: easypodcastpro
-Tags: 
+Tags: youtube, video gallery, video list, vimeo
 Requires at least: 6.0
 Tested up to: 6.4.2
 Requires PHP: 7.3

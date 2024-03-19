@@ -31,12 +31,15 @@ class Playlist {
     }
 
     render() {
-        const videos = this.playlistData.videos || [];
-        if (! videos.length) {
+        const videos  = this.playlistData.videos || [];
+        const vidKeys = Object.keys(videos);
+        if (! vidKeys.length) {
             return;
         }
-        const first = videos[0];
-        const videoMarkup = `${videos.map(video => {
+        const firstID = vidKeys[0];
+        const first = videos[firstID];
+        const videoMarkup = `${vidKeys.map(key => {
+            const video = videos[key];
             if (! video.url) {
                 return;
             }

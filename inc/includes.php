@@ -84,7 +84,10 @@ function evp_get_oembed_data($url) {
             $data['author_name'] = $user->display_name;
             $data['author_url']  = $user->user_url;
         }
-        return $data;
+        return array(
+            'video_list' => $data,
+            'source'     => array( 'url' => $id ),
+        );
     }
 
     // If API keys are available, let's use them to get the video data.
@@ -107,15 +110,19 @@ function evp_get_oembed_data($url) {
                 if ( ! $dataid || ! is_array( $dataid ) || ! isset( $dataid['items'] ) || ! isset( $dataid['items'][0]['id'] ) ) {
                     return false;
                 }
-                $channel_id = $dataid['items'][0]['id'];
-                $api_url .= "search?part=id&maxResults=40&key=$api_key&type=video&channelId=$channel_id";
+                $id = $dataid['items'][0]['id'];
+                $api_url .= "search?part=id&maxResults=40&key=$api_key&type=video&channelId=$id";
             }
             $items = evp_get_youtube_video_items( $api_url, $provider_type, $api_key, $id );
         }
         if ( ! $items || empty( $items ) ) {
             return false;
         }
-        return $items;
+
+        return array(
+            'video_list' => $items,
+            'source'     => array( $provider_type => $id ),
+        );
     }
 
     // If API key is not available. We can only process video links.
@@ -131,8 +138,16 @@ function evp_get_oembed_data($url) {
 
     $final_url = add_query_arg($query_params, $provider_url);
     $data = evp_get_remote_data($final_url);
+    $data = $data ? evp_format_oembed_data($data, $url, $provider_type, $service, $id) : false;
 
-	return $data ? evp_format_oembed_data($data, $url, $provider_type, $service, $id) : false;
+    if ( ! $data ) {
+        return false;
+    }
+
+	return array(
+        'video_list' => $data,
+        'source'     => array( $provider_type => $id ),
+    );
 }
 
 function evp_get_youtube_video_items( $url, $provider_type, $api_key, $id, $max = 500 ) {
@@ -156,14 +171,18 @@ function evp_get_youtube_video_items( $url, $provider_type, $api_key, $id, $max 
         $next_page_token = isset( $data['nextPageToken'] ) && $data['nextPageToken'] ? $data['nextPageToken'] : false;
     }
     foreach ( $items as $item ) {
-        $vidsInfo[] = array(
+        $item_id = isset( $item['id'] ) ? sanitize_text_field( $item['id'] ) : false;
+        if ( ! $item_id ) {
+            continue;
+        }
+        $vidsInfo[ $item_id ] = array(
             'title'         => isset( $item['snippet']['title'] ) ? sanitize_text_field( $item['snippet']['title'] ) : '',
             'date'          => isset( $item['snippet']['publishedAt'] ) ? sanitize_text_field( $item['snippet']['publishedAt'] ) : '',
             'thumbnail_url' => isset( $item['snippet']['thumbnails']['high']['url'] ) ? array( esc_url_raw( $item['snippet']['thumbnails']['high']['url'] ) ) : array(),
             'tags'          => isset( $item['snippet']['tags'] ) ? sanitize_text_field( $item['snippet']['tags'] ) : '',
-            'author_name'  => isset( $item['snippet']['channelTitle'] ) ? sanitize_text_field( $item['snippet']['channelTitle'] ) : '',
-            'author_url'   => isset( $item['snippet']['channelId'] ) ? 'https://www.youtube.com/channel/' . sanitize_text_field( $item['snippet']['channelId'] ) : '',
-            'author_id'    => isset( $item['snippet']['channelId'] ) ? sanitize_text_field( $item['snippet']['channelId'] ) : '',
+            'author_name'   => isset( $item['snippet']['channelTitle'] ) ? sanitize_text_field( $item['snippet']['channelTitle'] ) : '',
+            'author_url'    => isset( $item['snippet']['channelId'] ) ? 'https://www.youtube.com/channel/' . sanitize_text_field( $item['snippet']['channelId'] ) : '',
+            'author_id'     => isset( $item['snippet']['channelId'] ) ? sanitize_text_field( $item['snippet']['channelId'] ) : '',
             'duration'      => isset( $item['contentDetails']['duration'] ) ? sanitize_text_field( $item['contentDetails']['duration'] ) : '',
             'uploadStatus'  => isset( $item['status']['uploadStatus'] ) ? sanitize_text_field( $item['status']['uploadStatus'] ) : '',
             'privacyStatus' => isset( $item['status']['privacyStatus'] ) ? sanitize_text_field( $item['status']['privacyStatus'] ) : '',
@@ -254,19 +273,22 @@ function evp_format_oembed_data($data, $url, $provider_type, $service, $id) {
         }
     }
 
-    return array( array(
-        'title'         => isset( $data['title'] ) ? sanitize_text_field( $data['title'] ) : '',
-        'date'          => isset( $data['upload_date'] ) ? esc_url_raw( $data['upload_date'] ) : '',
-        'thumbnail_url' => $thumb_url,
-        'url'           => esc_url_raw( $url ),
-        'type'          => $provider_type,
-        'provider'      => $service,
-        'author_name'  => isset( $data['author_name'] ) ? sanitize_text_field( $data['author_name'] ) : '',
-        'author_url'   => isset( $data['author_url'] ) ? esc_url_raw( $data['author_url'] ) : '',
-        'id'            => sanitize_text_field( $id ),
-        'source'        => esc_url_raw( $url ),
-        'duration'      => isset( $data['duration'] ) ? absint( $data['duration'] ) : '',
-    ) );
+    $id = sanitize_text_field( $id );
+    return array(
+        $id => array(
+            'title'         => isset( $data['title'] ) ? sanitize_text_field( $data['title'] ) : '',
+            'date'          => isset( $data['upload_date'] ) ? esc_url_raw( $data['upload_date'] ) : '',
+            'thumbnail_url' => $thumb_url,
+            'url'           => esc_url_raw( $url ),
+            'type'          => $provider_type,
+            'provider'      => $service,
+            'author_name'  => isset( $data['author_name'] ) ? sanitize_text_field( $data['author_name'] ) : '',
+            'author_url'   => isset( $data['author_url'] ) ? esc_url_raw( $data['author_url'] ) : '',
+            'id'            => $id,
+            'source'        => esc_url_raw( $url ),
+            'duration'      => isset( $data['duration'] ) ? absint( $data['duration'] ) : '',
+        )
+    );
 }
 
 function evp_is_image_exists($image_url) {

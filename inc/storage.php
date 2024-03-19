@@ -150,8 +150,8 @@ function evp_escape_playlist( $data ) {
     }
     $escaped_data = array();
     $videos = isset( $data['videos'] ) ? $data['videos'] : array();
-    foreach( $videos as $video_data ) {
-        $escaped_data[] = array(
+    foreach( $videos as $key => $video_data ) {
+        $escaped_data[ $key ] = array(
             'title'         => isset( $video_data['title'] ) ? esc_html( $video_data['title'] ) : '',
             'url'           => isset( $video_data['url'] ) ? esc_url( $video_data['url'] ) : '',
             'type'          => isset( $video_data['type'] ) ? esc_html( $video_data['type'] ) : '',

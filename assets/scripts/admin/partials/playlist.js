@@ -181,7 +181,8 @@ class Playlist {
                 thumbUrl,
                 i18n.update,
                 i18n.cancel,
-                i18n.editvidinfo
+                i18n.editvidinfo,
+                videoData.id,
             )
         );
         modal.html(markup);
@@ -354,12 +355,14 @@ class Playlist {
         const item = jQuery(e.currentTarget).closest('.evp-video-listitem');
         const url = item.attr('data-video');
         const playlist = container.attr('data-id');
+        const key = item.attr('data-key');
         if (! url || ! playlist) return;
         const data = {
             action: 'evp_delete_video',
             security: vars.security,
             playlist: playlist,
             video: url,
+            video_id: key,
         };
         jQuery.post(vars.ajaxUrl, data, (response) => {
             if (response.success) {
@@ -373,6 +376,7 @@ class Playlist {
         const container = this.listManager.find('.evp-playlists-content');
         const modal = jQuery('.evp-video-modal');
         const url = modal.find('.evp-edit-video-url a').attr('href');
+        const vidID = modal.find('.evp-edit-video-url a').attr('data-video');
         const playlist = container.attr('data-id');
         if (! url || ! playlist) return;
         const data = {
@@ -380,6 +384,7 @@ class Playlist {
             security: vars.security,
             playlist: playlist,
             video: url,
+            video_id: vidID,
             title: modal.find('#evp-edit-video-title').val(),
             thumb: modal.find('#evp-edit-video-thumb').val(),
             author: modal.find('#evp-edit-video-author').val(),
@@ -404,12 +409,16 @@ class Playlist {
         const urls = vids.map((index, item) => {
             return jQuery(item).attr('data-video');
         }).get();
+        const ids = vids.map((index, item) => {
+            return jQuery(item).attr('data-key');
+        }).get();
         if (0 === urls.length || ! playlist) return;
         const data = {
             action: 'evp_save_playlist_sorting',
             security: vars.security,
             playlist: playlist,
             videos: urls,
+            ids: ids,
         };
         jQuery.post(vars.ajaxUrl, data, (response) => {
             if (response.success) {

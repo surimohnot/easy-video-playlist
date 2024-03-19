@@ -180,7 +180,8 @@ function evp_add_new_video() {
         } else {
             $playlist_data = evp_get_data($playlist, false);
             $playlist_data = $playlist_data ? $playlist_data : array();
-            $videos = isset($playlist_data['videos']) ? $playlist_data['videos'] : array();
+            $videos  = isset($playlist_data['videos']) ? $playlist_data['videos'] : array();
+            $sources = isset($playlist_data['sources']) ? $playlist_data['sources'] : array();
             $is_video_exists = false;
             foreach ($videos as $key => $video_data) {
                 if ( isset($video_data['url']) && $video_data['url'] == $video ) {
@@ -193,8 +194,13 @@ function evp_add_new_video() {
             } else {
                 $video_data = evp_get_oembed_data($video);
                 if ( $video_data ) {
-                    $playlist_data['videos'] = array_merge( $videos, $video_data );
-                    $playlist_data['videos'] = array_filter($playlist_data['videos']);
+                    $video_list = isset( $video_data['video_list'] ) ? $video_data['video_list'] : array();
+                    $source     = isset( $video_data['source'] ) ? $video_data['source'] : array();
+                    $videos  = array_merge( $videos, $video_list );
+                    $sources = array_merge_recursive( $sources, array( $source ) );
+                    $sources = array_map( 'array_unique', $sources );
+                    $playlist_data['videos']  = $videos;
+                    $playlist_data['sources'] = $sources;
                     evp_update_data($playlist, $playlist_data);
                     $success = true;
                     $data    = evp_get_playlists();
@@ -225,19 +231,17 @@ function evp_delete_video() {
 
     $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
     $video = isset($_POST['video']) ? esc_url_raw(wp_unslash($_POST['video'])) : '';
+    $video_id = isset($_POST['video_id']) ? sanitize_text_field(wp_unslash($_POST['video_id'])) : '';
 
     $success = false;
 
     $data = evp_get_data($playlist, false);
     $videos = isset($data['videos']) ? $data['videos'] : array();
-    foreach ($videos as $key => $video_data) {
-        if ( isset($video_data['url']) && $video_data['url'] == $video ) {
-            unset($videos[$key]);
-            $data['videos'] = array_values($videos);
-            evp_update_data($playlist, $data);
-            $success = true;
-            break;
-        }
+    if ( isset( $videos[ $video_id ] ) ) {
+        unset($videos[ $video_id ]);
+        $data['videos'] = $videos;
+        evp_update_data($playlist, $data);
+        $success = true;
     }
 
     echo wp_json_encode(
@@ -260,6 +264,7 @@ function evp_edit_video_info() {
 
     $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
     $video = isset($_POST['video']) ? esc_url_raw(wp_unslash($_POST['video'])) : '';
+    $video_id = isset($_POST['video_id']) ? sanitize_text_field(wp_unslash($_POST['video_id'])) : '';
     $title = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
     $thumbnail = isset($_POST['thumb']) ? esc_url_raw(wp_unslash($_POST['thumb'])) : '';
     $author = isset($_POST['author']) ? sanitize_text_field(wp_unslash($_POST['author'])) : '';
@@ -270,21 +275,19 @@ function evp_edit_video_info() {
 
     $ndata = evp_get_data($playlist, false);
     $videos = isset($ndata['videos']) ? $ndata['videos'] : array();
-    foreach ($videos as $key => $video_data) {
-        if ( isset($video_data['url']) && $video_data['url'] == $video ) {
-            $thumb_url = isset($video_data['thumbnail_url']) && is_array($video_data['thumbnail_url']) ? $video_data['thumbnail_url'] : array();
-            array_unshift($thumb_url, esc_url_raw($thumbnail));
-            $video_data['title'] = sanitize_text_field($title);
-            $video_data['thumbnail_url'] = $thumb_url;
-            $video_data['author_name'] = sanitize_text_field($author);
-            $video_data['author_url'] = esc_url_raw($author_url);
-            $videos[$key] = $video_data;
-            $ndata['videos'] = $videos;
-            evp_update_data($playlist, $ndata);
-            $success = true;
-            $data = evp_get_playlists();
-            break;
-        }
+    if ( isset( $videos[ $video_id ] ) ) {
+        $video_data = $videos[ $video_id ];
+        $thumb_url = isset($video_data['thumbnail_url']) && is_array($video_data['thumbnail_url']) ? $video_data['thumbnail_url'] : array();
+        array_unshift($thumb_url, $thumbnail);
+        $video_data['thumbnail_url'] = $thumb_url;
+        $video_data['title'] = sanitize_text_field($title);
+        $video_data['author_name'] = sanitize_text_field($author);
+        $video_data['author_url'] = esc_url_raw($author_url);
+        $videos[ $video_id ] = $video_data;
+        $ndata['videos'] = $videos;
+        evp_update_data($playlist, $ndata);
+        $success = true;
+        $data = evp_get_playlists();
     }
 
     echo wp_json_encode(
@@ -307,16 +310,18 @@ function evp_save_playlist_sorting() {
     check_ajax_referer('evp-admin-ajax-nonce', 'security');
 
     $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
-    $videos = isset($_POST['videos']) ? array_map('esc_url_raw', wp_unslash($_POST['videos'])) : '';
+    $videos   = isset($_POST['videos']) ? array_map('esc_url_raw', wp_unslash($_POST['videos'])) : '';
+    $ids      = isset($_POST['ids']) ? array_map('sanitize_text_field', wp_unslash($_POST['ids'])) : '';
 
     $data = evp_get_data($playlist, false);
     $old_videos = isset($data['videos']) ? $data['videos'] : array();
     $new_videos = array();
 
-    $old_urls = array_column($old_videos, 'url');
-    foreach ($videos as $url) {
-        $key = array_search($url, $old_urls);
-        $new_videos[] = $old_videos[$key];
+    foreach ($ids as $id) {
+        if ( ! isset( $old_videos[ $id ] ) ) {
+            continue;
+        }
+        $new_videos[ $id ] = $old_videos[ $id ];
     }
 
     $data['videos'] = $new_videos;

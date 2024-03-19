@@ -15,7 +15,7 @@ function addVideoForm() {
 function addVideoEditForm() {
     return `<div class="evp-edit-video-form">
         <h3>{13}</h3>
-        <div class="evp-edit-video-url evp-edit-video-form-elem"><div><label>{1}</label></div><a href="{2}" target="_blank">{2}</a></div>
+        <div class="evp-edit-video-url evp-edit-video-form-elem"><div><label>{1}</label></div><a href="{2}" data-video="{14}" target="_blank">{2}</a></div>
         <div class="evp-edit-video-title evp-edit-video-form-elem">
             <label for="evp-edit-video-title">{3}</label>
             <input type="text" id="evp-edit-video-title" value="{4}">
