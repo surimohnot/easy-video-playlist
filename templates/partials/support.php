@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 <div class="evp-support">
     <h2 class="evp-playlists-no-content-title"><?php esc_html_e( 'How to Get Started with the plugin?', 'easy-video-playlist' ); ?></h2>
     <p>This plugin will help you to create amazing video playlists from YouTube, Vimeo or Self Hosted videos. You only need video URLs to get started.</p>
+    <p>Check the <a href="https://youtu.be/fRompCJiZfM" target="_blank">YouTube video</a> to quickly get started.</p>
     <h4>Here are two simple steps to get started.</h4>
     <div>
         <div style="margin-bottom: 20px;">

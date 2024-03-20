@@ -100,7 +100,7 @@ class Playlist {
     }
 
     events() {
-        this.playlistContainer.find('.evp-playlist-video-index').on('click', '.evp-playlist-video__image, .evp-playlist-video__title', this.playSelectedVideo.bind(this));
+        this.playlistContainer.find('.evp-playlist-video-index').on('click', '.evp-playlist-video-index-item', this.playSelectedVideo.bind(this));
         this.playlistContainer.find('.evp-playlist-load-more').on('click', this.loadMoreVideos.bind(this));
         jQuery(window).on('resize', () => {
 			this.resizeTimeout = setTimeout(this.playerStyleUpdate.bind(this), 100);
@@ -150,12 +150,13 @@ class Playlist {
 
     playVideo(selectedVideo) {
         const videoID = selectedVideo.attr('data-video-id');
-        const videos = this.playlistData.videos || [];
-        if (! videos.length) {
+        const videos  = this.playlistData.videos || {};
+        const vidKeys = Object.keys(videos);
+        if (! vidKeys.length) {
             return;
         }
 
-        const video = videos.find(video => video.id === videoID);
+        const video = videos[videoID];
         if ( ! video ) {
             return;
         }
