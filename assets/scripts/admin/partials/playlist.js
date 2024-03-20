@@ -263,7 +263,11 @@ class Playlist {
                 }
             } else {
                 this.closeVideoModal();
-                this.response('This Video could not be added.', 'evp-error');
+                if ( response.message ) {
+                    this.response(response.message, 'evp-error');
+                } else {
+                    this.response('This Video could not be added.', 'evp-error');
+                }
             }
             this.listManager.find('.evp-video-url').val('');
         }, 'json');

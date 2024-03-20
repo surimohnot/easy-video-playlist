@@ -93,7 +93,7 @@ function evp_get_oembed_data($url) {
     // If API keys are available, let's use them to get the video data.
     $api = get_option( 'evp_settings_api' );
     $api = $api && is_array( $api ) ? $api : array();
-    if ( isset( $api[ $service ] ) ) {
+    if ( isset( $api[ $service ] ) && ! empty( $api[ $service ] ) ) {
         $api_key = $api[ $service ];
         $items = array();
         if ( 'youtube' === $service ) {
