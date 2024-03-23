@@ -14,7 +14,7 @@
  * Plugin Name:       Easy Video Playlist
  * Plugin URI:        https://easypodcastpro.com
  * Description:       Create video gallery and playlist from Youtube, Vimeo or Self Hosted videos.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            easypodcastpro
  * License:           GPL-3.0+
  * License URI:       http://www.gnu.org/licenses/gpl-3.0.txt
@@ -28,7 +28,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Define plugin constants.
-define( 'EVP_VERSION', '1.0.0' );
+define( 'EVP_VERSION', '1.1.0' );
 define( 'EVP_DIR', plugin_dir_path( __FILE__ ) );
 define( 'EVP_URL', plugin_dir_url( __FILE__ ) );
 define( 'EVP_BASENAME', plugin_basename( __FILE__ ) );
