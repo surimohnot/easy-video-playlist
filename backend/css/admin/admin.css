@@ -1,0 +1,719 @@
+.toplevel_page_evp_settings *,
+.toplevel_page_evp_settings *:before,
+.toplevel_page_evp_settings *:after
+{
+    box-sizing: border-box;
+}
+
+.toplevel_page_evp_settings #wpcontent
+{
+    padding-left: 0;
+}
+
+.toplevel_page_evp_settings ul
+{
+    margin: 0;
+}
+
+.toplevel_page_evp_settings fieldset
+{
+    padding: 15px;
+
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    background-color: #fff;
+}
+
+.toplevel_page_evp_settings fieldset legend
+{
+    font-size: 14px;
+
+    padding: 5px 15px 0 15px;
+
+    letter-spacing: 1px;
+
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.toplevel_page_evp_settings input[type='text'],
+.toplevel_page_evp_settings input[type='password'],
+.toplevel_page_evp_settings input[type='url'],
+.toplevel_page_evp_settings input[type='submit'],
+.toplevel_page_evp_settings select
+{
+    line-height: 1;
+
+    width: 100%;
+    min-height: auto;
+    padding: 15px;
+
+    border-width: 0;
+    border-bottom: 1px solid #ccc;
+    border-radius: 0;
+    border-radius: 5px;
+    background-color: #f2f2f2;
+}
+
+.toplevel_page_evp_settings button
+{
+    font-size: 15px;
+
+    padding: 12px;
+
+    cursor: pointer;
+    transition: all .2s;
+
+    border: 1px solid rgba(238, 190, 2, .2);
+    border-radius: 4px;
+    background-color: rgba(238, 190, 2, .15);
+}
+
+.toplevel_page_evp_settings button:last-of-type
+{
+    margin-right: 0;
+}
+
+.toplevel_page_evp_settings button:hover,
+.toplevel_page_evp_settings button:focus
+{
+    background-color: rgba(238, 190, 2, .25);
+}
+
+.toplevel_page_evp_settings button .dashicons + span
+{
+    margin-left: 5px;
+}
+
+.toplevel_page_evp_settings .evp-header
+{
+    display: flex;
+
+    padding: 0 20px;
+
+    border-bottom: 1px solid #e6e6e6;
+    background-color: #fff;
+
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toplevel_page_evp_settings .evp-header h1
+{
+    font-size: 22px;
+    font-weight: normal;
+
+    margin: 0;
+}
+
+.toplevel_page_evp_settings .evp-header .evp-nav ul
+{
+    font-size: 16px;
+
+    display: flex;
+
+    margin: 0;
+}
+
+.toplevel_page_evp_settings .evp-header .evp-nav ul a
+{
+    text-decoration: none;
+
+    color: currentColor;
+}
+
+.toplevel_page_evp_settings .evp-header .evp-nav ul li
+{
+    margin: 0;
+    padding: 20px;
+}
+
+.toplevel_page_evp_settings .easy-video-playlist
+{
+    position: relative;
+}
+
+.toplevel_page_evp_settings .evp-create-new
+{
+    margin-bottom: 20px;
+}
+
+.toplevel_page_evp_settings .evp-create-new .evp-playlist-name
+{
+    margin-bottom: 10px;
+
+    border-radius: 5px;
+}
+
+.toplevel_page_evp_settings .evp-create-new .evp-add-playlist-btn
+{
+    width: 100%;
+
+    cursor: pointer;
+}
+
+.toplevel_page_evp_settings .evp-playlists-index
+{
+    margin-bottom: 20px;
+}
+
+.toplevel_page_evp_settings .evp-play-list-item,
+.toplevel_page_evp_settings .evp-settings-item
+{
+    font-size: 15px;
+
+    padding: 15px 18px;
+
+    cursor: pointer;
+
+    border: 1px solid #ccc;
+    border-right: 5px solid #ccc;
+    border-radius: 4px;
+    background-color: #f7f7f7;
+}
+
+.toplevel_page_evp_settings .evp-play-list-item-active,
+.toplevel_page_evp_settings .evp-settings-item-active
+{
+    font-weight: bold;
+
+    border-right-color: #eebe02;
+}
+
+.toplevel_page_evp_settings .evp-play-list-item:last-of-type,
+.toplevel_page_evp_settings .evp-settings-item:last-of-type
+{
+    margin-bottom: 0;
+}
+
+.toplevel_page_evp_settings .evp-playlists-content,
+.toplevel_page_evp_settings .evp-playlists-no-content,
+.toplevel_page_evp_settings .evp-video-modal
+{
+    position: relative;
+
+    margin-bottom: 20px;
+    padding: 40px;
+
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    background-color: #fff;
+}
+
+.toplevel_page_evp_settings .evp-support
+{
+    position: relative;
+
+    max-width: 800px;
+    margin: 60px auto 20px;
+    padding: 40px;
+
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    background-color: #fff;
+}
+
+.toplevel_page_evp_settings .evp-settings
+{
+    max-width: 1320px;
+    margin: 40px auto 0;
+    padding: 0 20px;
+}
+
+.toplevel_page_evp_settings .evp-playlist-title
+{
+    font-size: 24px;
+
+    display: flex;
+
+    margin: 0 0 20px;
+    padding-bottom: 15px;
+
+    border-bottom: 3px double rgba(238, 190, 2, .25);
+
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toplevel_page_evp_settings .evp-video-index-list
+{
+    margin-top: 15px;
+}
+
+.toplevel_page_evp_settings .evp-video-listitem
+{
+    display: flex;
+
+    margin-bottom: 10px;
+    padding: 3px 0 3px 10px;
+
+    cursor: grab;
+
+    border-radius: 3px;
+    background-color: #f7f7f7;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toplevel_page_evp_settings .evp-video-listitem.ui-sortable-helper
+{
+    cursor: grabbing;
+}
+
+.toplevel_page_evp_settings .evp-video-listitem a
+{
+    text-decoration: none;
+
+    color: currentColor;
+}
+
+.toplevel_page_evp_settings .evp-video-listitem button
+{
+    cursor: pointer;
+}
+
+.toplevel_page_evp_settings .evp-video-listitem-title
+{
+    overflow: hidden;
+
+    max-width: calc(95% - 100px);
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.toplevel_page_evp_settings .evp-video-listitem:last-of-type
+{
+    margin-bottom: 0;
+}
+
+.toplevel_page_evp_settings .evp-delete-video
+{
+    border: none;
+    background-color: transparent;
+}
+
+.toplevel_page_evp_settings .evp-delete-video:hover,
+.toplevel_page_evp_settings .evp-delete-video:focus
+{
+    color: red;
+    background-color: transparent;
+}
+
+.toplevel_page_evp_settings .evp-edit-video-info
+{
+    border: none;
+    background-color: transparent;
+}
+
+.toplevel_page_evp_settings .evp-edit-video-info:hover,
+.toplevel_page_evp_settings .evp-edit-video-info:focus
+{
+    color: green;
+    background-color: transparent;
+}
+
+.toplevel_page_evp_settings .evp-video-modal
+{
+    display: flex;
+
+    background-color: #fff;
+
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.toplevel_page_evp_settings .evp-edit-video-form,
+.toplevel_page_evp_settings .evp-add-video-form
+{
+    width: 100%;
+}
+
+.toplevel_page_evp_settings .evp-edit-video-form .evp-video-url,
+.toplevel_page_evp_settings .evp-add-video-form .evp-video-url
+{
+    margin-bottom: 15px;
+}
+
+.toplevel_page_evp_settings .evp-edit-video-form label,
+.toplevel_page_evp_settings .evp-add-video-form label
+{
+    font-size: 14px;
+    font-weight: 500;
+
+    display: block;
+
+    margin-bottom: 5px;
+}
+
+.toplevel_page_evp_settings .evp-add-video-btn,
+.toplevel_page_evp_settings .evp-save-edit-info-btn
+{
+    margin-right: 5px;
+}
+
+.toplevel_page_evp_settings .evp-edit-video-form-elem
+{
+    margin-bottom: 15px;
+}
+
+.toplevel_page_evp_settings .evp-save-playlist-sorting
+{
+    display: none;
+
+    margin-top: 20px;
+}
+
+.toplevel_page_evp_settings .evp-video-sorted .evp-save-playlist-sorting
+{
+    display: inline-block;
+}
+
+.toplevel_page_evp_settings .evp-playlist-content-tabs
+{
+    display: flex;
+
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 2px 10px;
+
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+}
+
+.toplevel_page_evp_settings .evp-playlist-content-tabs-item
+{
+    font-size: 14px;
+
+    margin: 0;
+    padding: 10px;
+
+    cursor: pointer;
+
+    border-bottom: 3px solid transparent;
+}
+
+.toplevel_page_evp_settings .evp-playlist-content-tabs-item.evp-tab-active
+{
+    border-bottom-color: rgba(238, 190, 2, .5);
+}
+
+.toplevel_page_evp_settings .evp-playlist-content-tabs-item a
+{
+    text-decoration: none;
+
+    color: currentColor;
+}
+
+.toplevel_page_evp_settings .evp-playlist-content-tabs-item a:hover,
+.toplevel_page_evp_settings .evp-playlist-content-tabs-item a:focus
+{
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.toplevel_page_evp_settings .evp-playlist-info-title
+{
+    font-weight: bold;
+}
+
+.toplevel_page_evp_settings .evp-playlist-shortcode
+{
+    padding: 15px;
+
+    border-radius: 5px;
+    background-color: #f2f2f2;
+}
+
+.toplevel_page_evp_settings .evp-playlists-no-content,
+.toplevel_page_evp_settings .evp-playlists-no-content p,
+.toplevel_page_evp_settings .evp-support,
+.toplevel_page_evp_settings .evp-support p,
+.toplevel_page_evp_settings .evp-settings,
+.toplevel_page_evp_settings .evp-settings p
+{
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.toplevel_page_evp_settings .evp-playlists-no-content h2,
+.toplevel_page_evp_settings .evp-support h2,
+.toplevel_page_evp_settings .evp-settings h2
+{
+    font-size: 1.25em;
+}
+
+.toplevel_page_evp_settings .evp-playlists-no-content h3,
+.toplevel_page_evp_settings .evp-support h3,
+.toplevel_page_evp_settings .evp-settings h3
+{
+    font-size: 1.15em;
+}
+
+.toplevel_page_evp_settings .evp-playlists-no-content h4,
+.toplevel_page_evp_settings .evp-support h4,
+.toplevel_page_evp_settings .evp-settings h4
+{
+    font-size: 1.05em;
+}
+
+.toplevel_page_evp_settings .evp-support-video
+{
+    position: relative;
+
+    clear: both;
+
+    width: 100%;
+    max-width: 965px;
+    height: auto;
+    margin: 0 auto 20px;
+
+    color: #fefcf6;
+    border-radius: 10px;
+    background-color: #000;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .4);
+}
+
+.toplevel_page_evp_settings .evp-support-video:after
+{
+    display: block;
+
+    width: auto;
+    padding-top: 56.25%;
+
+    content: '';
+}
+
+.toplevel_page_evp_settings .evp-support-video iframe
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+.toplevel_page_evp_settings .evp-settings-api-title
+{
+    margin-top: 0;
+}
+
+.toplevel_page_evp_settings .evp-settings-key-input
+{
+    display: flex;
+
+    margin-bottom: 10px;
+
+    align-items: center;
+    flex: 1;
+}
+
+.toplevel_page_evp_settings .evp-settings-key-input button
+{
+    margin-left: 10px;
+
+    flex-basis: 30%;
+}
+
+.toplevel_page_evp_settings .evp-settings-api-input-wrapper
+{
+    position: relative;
+
+    width: 100%;
+}
+
+.toplevel_page_evp_settings .evp-settings-api-input-wrapper input
+{
+    width: 100%;
+}
+
+.toplevel_page_evp_settings .evp-settings-api-input-wrapper button
+{
+    position: absolute;
+    top: 50%;
+    right: 0;
+
+    padding: 10px !important;
+
+    transform: translateY(-50%);
+
+    color: #3582c4 !important;
+    border-width: 0 !important;
+    background-color: transparent !important;
+}
+
+.toplevel_page_evp_settings .evp-settings-api-input-wrapper button .dashicons-hidden
+{
+    display: none;
+}
+
+.toplevel_page_evp_settings .evp-settings-api-input-wrapper button.toggled-on .dashicons-hidden
+{
+    display: block;
+}
+
+.toplevel_page_evp_settings .evp-settings-api-input-wrapper button.toggled-on .dashicons-visibility
+{
+    display: none;
+}
+
+.toplevel_page_evp_settings .evp-settings-key-info
+{
+    font-size: 15px;
+    font-style: italic;
+
+    margin: 0 0 0 5px;
+
+    color: #999;
+}
+
+#evp-action-feedback
+{
+    position: fixed;
+    z-index: 50;
+    top: -100px;
+    left: 50%;
+
+    width: auto;
+    padding: 10px;
+
+    transform: translateX(-50%);
+    text-align: center;
+
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+
+    align-items: center;
+}
+
+#evp-action-feedback,
+#evp-action-feedback .evp-error-close,
+#evp-action-feedback .dashicons
+{
+    display: none;
+}
+
+#evp-action-feedback.evp-running
+{
+    display: block;
+
+    animation: slideDown .5s ease-in-out forwards;
+}
+
+#evp-action-feedback.evp-running .dashicons-update
+{
+    display: inline-block;
+}
+
+#evp-action-feedback.evp-error
+{
+    display: flex;
+
+    animation: slideDown .5s ease-in-out forwards;
+}
+
+#evp-action-feedback.evp-error .dashicons-no
+{
+    display: inline-block;
+
+    color: #c30;
+}
+
+#evp-action-feedback.evp-error .evp-error-close
+{
+    display: inline-block;
+
+    margin-left: 10px;
+    padding: 3px;
+
+    cursor: pointer;
+
+    border: 1px solid #ccc;
+    border-radius: 100%;
+}
+
+#evp-action-feedback.evp-error .evp-error-close .dashicons-no
+{
+    display: inline-block;
+}
+
+#evp-action-feedback.evp-success
+{
+    display: flex;
+
+    animation: slideDown .5s ease-in-out forwards;
+}
+
+#evp-action-feedback.evp-success .dashicons-yes
+{
+    display: inline-block;
+
+    color: #00b33c;
+}
+
+@keyframes slideDown
+{
+    0%
+    {
+        top: -100px;
+    }
+    100%
+    {
+        top: 75px;
+    }
+}
+
+@media only screen and (min-width: 740px)
+{
+    .toplevel_page_evp_settings .evp-settings-wrapper
+    {
+        display: flex;
+
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .toplevel_page_evp_settings .evp-settings-sidebar
+    {
+        width: 20%;
+    }
+    .toplevel_page_evp_settings .evp-settings-content
+    {
+        position: relative;
+
+        width: calc(80% - 40px);
+        margin-bottom: 20px;
+        padding: 40px;
+
+        border: 1px solid #e6e6e6;
+        border-radius: 10px;
+        background-color: #fff;
+    }
+}
+
+@media only screen and (min-width: 1040px)
+{
+    .toplevel_page_evp_settings .evp-playlist-manager
+    {
+        display: flex;
+
+        max-width: 1320px;
+        margin: 40px auto 0;
+        padding: 0 20px;
+
+        justify-content: space-between;
+    }
+    .toplevel_page_evp_settings .evp-playlist-manager .evp-playlists-main
+    {
+        width: calc(70% - 40px);
+    }
+    .toplevel_page_evp_settings .evp-playlist-manager .evp-playlists-sidebar
+    {
+        width: 30%;
+    }
+}

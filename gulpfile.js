@@ -35,11 +35,11 @@ var gulp           = require('gulp'),
 		"unitless-zero": true,
 		"vendor-prefix-align": true
 	},
-	jsPartials     = [ './assets/scripts/admin/admin.js', './assets/scripts/admin/partials/**/*.js', './assets/scripts/block/block.js', './assets/scripts/block/edit.js', './assets/scripts/block/save.js', './assets/scripts/block/index.js', './assets/scripts/front/front.js', './assets/scripts/front/partials/**/*.js' ],
-	cssPartials    = [ './assets/styles/admin/partials/**/*.scss', './assets/styles/admin/admin.scss' ],
-	adminCss       = [ './assets/styles/admin/admin.scss' ],
+	jsPartials       = [ '.backend/js/admin/admin.js', './backend/js/admin/partials/**/*.js', './backend/js/block/block.js', './backend/js/block/edit.js', './backend/js/block/save.js', './backend/js/block/index.js', './assets/scripts/front/front.js', './assets/scripts/front/partials/**/*.js' ],
+	cssPartials      = [ './backend/css/admin/partials/**/*.scss', './backend/css/admin/admin.scss' ],
+	adminCss         = [ './backend/css/admin/admin.scss' ],
 	frontCssPartials = [ './assets/styles/front/partials/**/*.scss', './assets/styles/front/front.scss' ],
-	frontCss       = [ './assets/styles/front/front.scss' ];
+	frontCss         = [ './assets/styles/front/front.scss' ];
 
 // Compile Sass files to generate main css file.
 function compileSass(css) {
@@ -107,8 +107,7 @@ gulp.task('build', gulp.series(
 			'!./package-lock.json',
 			'!./package.json',
 			'!./webpack.config.js',
-			'!./assets/**/*.scss',
-			'!./assets/styles/partials',
+			'!./backend/**/*.scss',
 			'!./.gitignore',
 			'!./.babelrc',
 		])
@@ -117,7 +116,7 @@ gulp.task('build', gulp.series(
 	function() {
 		return gulp.src([
 			'./easy-video-playlist/node_modules',
-			'./easy-video-playlist/assets/styles/admin/partials',
+			'./easy-video-playlist/backend/css/admin/partials',
 			'./easy-video-playlist/assets/styles/front/partials',
 		], {allowEmpty: true})
 			.pipe(clean());

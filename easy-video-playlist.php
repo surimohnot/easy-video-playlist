@@ -82,8 +82,10 @@ add_action(
 		require_once EVP_DIR . 'inc/markup.php';
 		require_once EVP_DIR . 'inc/storage.php';
 		require_once EVP_DIR . 'inc/includes.php';
-        require_once EVP_DIR . 'inc/admin.php';
 		require_once EVP_DIR . 'inc/front.php';
+
+		// Register Easy Video Playlist back-end hooks.
+		Easy_Video_Playlist\Backend\Register::init();
 	},
 	8
 );

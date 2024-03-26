@@ -1,9 +1,9 @@
 path = require('path');
 module.exports = {
 	entry: {
-		'assets/scripts/admin/admin' : "./assets/scripts/admin/admin.js",
+		'backend/js/admin/admin'     : "./backend/js/admin/admin.js",
 		'assets/scripts/front/front' : "./assets/scripts/front/front.js",
-		'assets/scripts/block/block' : "./assets/scripts/block/block.js",
+		'backend/js/block/block'     : "./backend/js/block/block.js",
 	},
 	output: {
    		path: path.resolve( __dirname, './' ),

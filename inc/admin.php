@@ -436,8 +436,8 @@ add_action('rest_api_init', 'evp_register_routes');
  * @since 1.0.0
  */
 function evp_add_icons() {
-    if ( file_exists( EVP_DIR . 'assets/images/plyr.svg' ) ) {
-        include_once EVP_DIR . 'assets/images/plyr.svg';
+    if ( file_exists( EVP_DIR . 'helper/assets/images/plyr.svg' ) ) {
+        include_once EVP_DIR . 'helper/assets/images/plyr.svg';
     }
 }
 add_action('admin_footer', 'evp_add_icons', 9999);
