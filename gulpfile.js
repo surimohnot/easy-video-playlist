@@ -108,6 +108,7 @@ gulp.task('build', gulp.series(
 			'!./package.json',
 			'!./webpack.config.js',
 			'!./backend/**/*.scss',
+			'!./frontend/**/*.scss',
 			'!./.gitignore',
 			'!./.babelrc',
 		])
@@ -116,8 +117,8 @@ gulp.task('build', gulp.series(
 	function() {
 		return gulp.src([
 			'./easy-video-playlist/node_modules',
-			'./easy-video-playlist/backend/css/admin/partials',
-			'./easy-video-playlist/assets/styles/front/partials',
+			'./easy-video-playlist/backend/css/partials',
+			'./easy-video-playlist/frontend/css/partials',
 		], {allowEmpty: true})
 			.pipe(clean());
 	}
