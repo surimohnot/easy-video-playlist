@@ -12,6 +12,9 @@ namespace Easy_Video_Playlist\Backend;
 use Easy_Video_Playlist\Backend\Inc\Loader;
 use Easy_Video_Playlist\Backend\Inc\Core;
 use Easy_Video_Playlist\Backend\Admin\Admin as Admin;
+use Easy_Video_Playlist\Backend\Inc\Block;
+use Easy_Video_Playlist\Backend\Inc\Shortcode;
+use Easy_Video_Playlist\Helper\Store\StoreManager;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -48,6 +51,9 @@ class Register {
 
         // Support AJAX functionality.
         self::support_ajax_functionality();
+
+        // Register Custom Post Types Storage.
+        self::register_storage();
 
         // Initiate plugin's admin page.
 		Admin::init();
@@ -94,21 +100,8 @@ class Register {
      * @since 1.1.0
      */
     public static function register_block() {
-        register_block_type(
-            'evp-block/evp-block',
-            array(
-                'render_callback' => 'evp_render_player',
-                'attributes'      => apply_filters(
-                    'evp_block_attr',
-                    array(
-                        'playlist' => array(
-                            'type'    => 'string',
-                            'default' => '',
-                        ),
-                    )
-                ),
-            )
-        );
+        $block = Block::get_instance();
+		add_action( 'init', array( $block, 'register' ) );
     }
 
     /**
@@ -117,7 +110,18 @@ class Register {
      * @since 1.1.0
      */
     public static function register_shortcode() {
-        add_shortcode( 'evpvideoplaylist', 'evp_render_player' );
+        $shortcode = Shortcode::get_instance();
+        add_shortcode( 'evpvideoplaylist', array( $shortcode, 'render' ) );
+    }
+
+    /**
+     * Register Storage.
+     *
+     * @since 1.1.0
+     */
+    public static function register_storage() {
+        $store_manager = StoreManager::get_instance();
+        add_action( 'init', array( $store_manager, 'register' ) );
     }
 
     /**

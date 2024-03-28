@@ -9,7 +9,7 @@
 
 namespace Easy_Video_Playlist\Backend\Admin;
 
-use Easy_Video_Playlist\Lib\Singleton;
+use Easy_Video_Playlist\Helper\Core\Singleton;
 use Easy_Video_Playlist\Backend\Inc\Loader;
 
 /**

@@ -27,10 +27,16 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Define plugin constants.
+// Currently plugin version.
 define( 'EVP_VERSION', '1.1.0' );
+
+// Plugin directory path.
 define( 'EVP_DIR', plugin_dir_path( __FILE__ ) );
+
+// Plugin directory URL.
 define( 'EVP_URL', plugin_dir_url( __FILE__ ) );
+
+// Plugin basename.
 define( 'EVP_BASENAME', plugin_basename( __FILE__ ) );
 
 spl_autoload_register(
@@ -77,12 +83,11 @@ spl_autoload_register(
 add_action(
 	'plugins_loaded',
 	function() {
+		// Load plugin's text domain.
 		load_plugin_textdomain( 'easy-video-playlist', false, dirname( EVP_BASENAME ) . '/lang' );
-		require_once EVP_DIR . 'inc/validation.php';
-		require_once EVP_DIR . 'inc/markup.php';
-		require_once EVP_DIR . 'inc/storage.php';
-		require_once EVP_DIR . 'inc/includes.php';
-		require_once EVP_DIR . 'inc/front.php';
+		
+		// Register Easy Video Playlist front-end hooks.
+		Easy_Video_Playlist\Frontend\Register::init();
 
 		// Register Easy Video Playlist back-end hooks.
 		Easy_Video_Playlist\Backend\Register::init();

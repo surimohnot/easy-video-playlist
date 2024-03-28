@@ -2,12 +2,12 @@
 /**
  * Instance counter class.
  *
- * @since      1.0.0
+ * @since   1.0.0
  *
- * @package    Easy_Video_Playlist
+ * @package Easy_Video_Playlist
  */
 
-namespace Easy_Video_Playlist\Lib;
+namespace Easy_Video_Playlist\Helper\Core;
 
 /**
  * Load required font icons.

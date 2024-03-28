@@ -35,11 +35,11 @@ var gulp           = require('gulp'),
 		"unitless-zero": true,
 		"vendor-prefix-align": true
 	},
-	jsPartials       = [ '.backend/js/admin/admin.js', './backend/js/admin/partials/**/*.js', './backend/js/block/block.js', './backend/js/block/edit.js', './backend/js/block/save.js', './backend/js/block/index.js', './assets/scripts/front/front.js', './assets/scripts/front/partials/**/*.js' ],
+	jsPartials       = [ './backend/js/admin/admin.js', './backend/js/admin/partials/**/*.js', './backend/js/block/block.js', './backend/js/block/edit.js', './backend/js/block/save.js', './backend/js/block/index.js', './frontend/js/front.js', './frontend/js/partials/**/*.js' ],
 	cssPartials      = [ './backend/css/admin/partials/**/*.scss', './backend/css/admin/admin.scss' ],
 	adminCss         = [ './backend/css/admin/admin.scss' ],
-	frontCssPartials = [ './assets/styles/front/partials/**/*.scss', './assets/styles/front/front.scss' ],
-	frontCss         = [ './assets/styles/front/front.scss' ];
+	frontCssPartials = [ './frontend/css/partials/**/*.scss', './frontend/css/front.scss' ],
+	frontCss         = [ './frontend/css/front.scss' ];
 
 // Compile Sass files to generate main css file.
 function compileSass(css) {

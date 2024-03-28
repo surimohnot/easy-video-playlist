@@ -9,7 +9,9 @@
 
 namespace Easy_Video_Playlist\Backend\Inc;
 
-use Easy_Video_Playlist\Lib\Singleton;
+use Easy_Video_Playlist\Helper\Core\Singleton;
+use Easy_Video_Playlist\Helper\Functions\Getters;
+use Easy_Video_Playlist\Frontend\Inc\Loader as Frontend_Loader;
 
 /**
  * Load admin specific resources to the page.
@@ -35,34 +37,7 @@ class Loader extends Singleton {
             true
         );
 
-        // Load Front-end scripts.
-        wp_enqueue_script(
-            'evp-front-editor',
-            EVP_URL . 'assets/scripts/front/front.build.js',
-            array('jquery'),
-            EVP_VERSION,
-            true
-        );
-
-        // Load Front-end styles.
-        wp_enqueue_style(
-            'evp-front-editor',
-            EVP_URL . 'assets/styles/front/front.css',
-            array(),
-            EVP_VERSION
-        );
-
-        wp_localize_script(
-            'evp-front-editor',
-            'EVP_Front_Data',
-            apply_filters(
-                'evp_front_script_data',
-                array(
-                    'data' => array(),
-                    'url'  => home_url(),
-                )
-            )
-        );
+        Frontend_Loader::get_instance()->enqueue_frontend_assets();
 	}
 
     /**
@@ -74,6 +49,21 @@ class Loader extends Singleton {
         $api = get_option( 'evp_settings_api' );
         $api = $api && is_array( $api ) ? $api : array();
         $yt_api_key = isset( $api[ 'youtube' ] ) && $api[ 'youtube' ] ? true : false;
+        $i18n = array(
+            'vidurl'      => __( 'Enter URL of the Video, Playlist or Channel', 'easy-video-playlist' ),
+            'videourl'    => __( 'Video URL', 'easy-video-playlist' ),
+            'title'       => __( 'Title', 'easy-video-playlist' ),
+            'author'      => __( 'Channel', 'easy-video-playlist' ),
+            'authorurl'   => __( 'Channel URL', 'easy-video-playlist' ),
+            'thumbnail'   => __( 'Thumbnail Image URL', 'easy-video-playlist' ),
+            'exshorts'    => __( 'Exclude Shorts (Videos shorter than 60 Seconds)', 'easy-video-playlist' ),
+            'addvid'      => __( 'Add Video', 'easy-video-playlist' ),
+            'update'      => __( 'Update', 'easy-video-playlist' ),
+            'cancel'      => __( 'Cancel', 'easy-video-playlist' ),
+            'editvidinfo' => __( 'Edit Video Information', 'easy-video-playlist' ),
+            'createfirst' => __( 'Create Your First Playlist', 'easy-video-playlist' ),
+            'createnew'   => __( 'Create New Playlist', 'easy-video-playlist' ),
+        );
         wp_enqueue_script(
             'evp-admin',
             EVP_URL . 'backend/js/admin/admin.build.js',
@@ -91,8 +81,8 @@ class Loader extends Singleton {
                 array(
                     'ajaxurl'       => admin_url('admin-ajax.php'),
                     'security'      => wp_create_nonce( 'evp-admin-ajax-nonce' ),
-                    'videoPlaylist' => evp_get_playlists(),
-                    'i18n'          => evp_get_admin_i18n(),
+                    'videoPlaylist' => Getters::get_playlists(),
+                    'i18n'          => $i18n,
                     'api'           => array( 'youtube' => $yt_api_key ),
                     'setpage'       => esc_url( add_query_arg( 'tab', 'settings', admin_url( 'admin.php?page=evp_settings' ) ) ),
                 )
@@ -126,7 +116,7 @@ class Loader extends Singleton {
             array(
                 'methods'             => 'GET',
                 'callback'            => function() {
-                    return evp_get_playlist_index();
+                    return Getters::get_playlist_index();
                 },
                 'permission_callback' => function () {
                     return current_user_can( 'edit_posts' );

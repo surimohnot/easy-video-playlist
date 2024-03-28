@@ -7,7 +7,10 @@
  * @since   1.0.0
  */
 
- namespace Easy_Video_Playlist\Backend\Inc;
+namespace Easy_Video_Playlist\Backend\Inc;
+
+use Easy_Video_Playlist\Frontend\Inc\Display;
+use Easy_Video_Playlist\Helper\Functions\Getters;
 
 /**
  * Class used to display video playlist.
@@ -75,7 +78,9 @@ class Widget extends \WP_Widget {
 			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
-        echo evp_render_player($instance);  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		$display = new Display( $instance );
+        $return  = false;
+		$display->render( $return );
 		echo $args['after_widget']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
@@ -88,7 +93,7 @@ class Widget extends \WP_Widget {
 	 */
 	public function get_widget_options( $settings ) {
 		$widget    = $this;
-		$playlists = evp_get_playlist_index();
+		$playlists = Getters::get_playlist_index();
 
 		return apply_filters(
 			'easy_video_playlist_widget_options',

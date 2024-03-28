@@ -7,7 +7,7 @@
  * @since   1.0.0
  */
 
-namespace Easy_Video_Playlist\Lib;
+namespace Easy_Video_Playlist\Helper\Core;
 
 /**
  * Singleton base class.

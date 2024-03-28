@@ -6,6 +6,8 @@
  * @since    1.0.0
  */
 
+use Easy_Video_Playlist\Helper\Functions\Markup;
+
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 ?>
 
@@ -21,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
         </div>
         <div class="evp-settings-content">
             <div id="evp-settings-api" class="evp-settings-content-item evp-settings-content-item-active">
-                <?php include evp_get_partial('settings-api'); ?>
+                <?php include Markup::get_partial('settings-api'); ?>
             </div>
         </div>
     </div>

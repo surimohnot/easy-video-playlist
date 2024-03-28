@@ -9,7 +9,9 @@
 
 namespace Easy_Video_Playlist\Backend\Inc;
 
-use Easy_Video_Playlist\Lib\Singleton;
+use Easy_Video_Playlist\Helper\Core\Singleton;
+use Easy_Video_Playlist\Helper\Functions\Getters;
+use Easy_Video_Playlist\Helper\Store\StoreManager;
 
 /**
  * Handle admin specific functionality of the plugin.
@@ -27,23 +29,24 @@ class Core extends Singleton {
      */
     public function add_new_playlist() {
         // Nounce Verification.
-        check_ajax_referer('evp-admin-ajax-nonce', 'security');
+        check_ajax_referer( 'evp-admin-ajax-nonce', 'security' );
 
         // Get Playlist Name.
-        $label   = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
-        $key     = strtolower(str_replace(' ', '-', $label));
+        $label   = isset( $_POST['playlist']) ? sanitize_text_field( wp_unslash( $_POST['playlist'] ) ) : '';
+        $key     = strtolower( str_replace( ' ', '-', $label ) );
         $success = false;
         $data    = false;
         $message = false;
 
         // Video playlist already exists.
-        $object_id = evp_get_data_index( $key, 'object_id' );
+        $store_manager = StoreManager::get_instance();
+        $object_id = $store_manager->get_data_index( $key, 'object_id' );
         if ( $object_id ) {
             $success = false;
             $data    = $object_id;
-            $message = __('Video playlist already exists.', 'evp_video_player');
+            $message = __( 'Video playlist already exists.', 'evp_video_player' );
         } else {
-            $object_id = evp_create_bucket($key, $label);
+            $object_id = $store_manager->create_bucket( $key, $label );
             if ( is_wp_error( $object_id ) ) {
                 $message = $object_id->get_error_message();
             } else {
@@ -69,20 +72,21 @@ class Core extends Singleton {
      */
     public function delete_playlist() {
         // Nounce Verification.
-        check_ajax_referer('evp-admin-ajax-nonce', 'security');
+        check_ajax_referer( 'evp-admin-ajax-nonce', 'security' );
 
         // Get Playlist Name.
-        $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
+        $playlist = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash( $_POST['playlist'] ) ) : '';
         $success = false;
         $data    = false;
         $message = false;
 
-        $object_id = evp_get_data_index( $playlist, 'object_id' );
+        $store_manager = StoreManager::get_instance();
+        $object_id = $store_manager->get_data_index( $playlist, 'object_id' );
         if ( $object_id ) {
-            $success = evp_delete_bucket($playlist);
-            $data    = evp_get_playlists();
+            $success = $store_manager->delete_bucket( $playlist );
+            $data    = Getters::get_playlists();
         } else {
-            $message = __('Playlist does not exists.', 'evp_video_player');
+            $message = __( 'Playlist does not exists.', 'evp_video_player' );
         }
 
         echo wp_json_encode(
@@ -102,29 +106,30 @@ class Core extends Singleton {
      */
     public function add_new_video() {
         // Nounce Verification.
-        check_ajax_referer('evp-admin-ajax-nonce', 'security');
+        check_ajax_referer( 'evp-admin-ajax-nonce', 'security' );
 
         // Get Playlist Name.
-        $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
-        $video    = isset($_POST['videourl']) ? esc_url_raw(wp_unslash($_POST['videourl'])) : '';
+        $playlist = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash( $_POST['playlist'] ) ) : '';
+        $video    = isset( $_POST['videourl'] ) ? esc_url_raw( wp_unslash( $_POST['videourl'] ) ) : '';
         $success = false;
         $data    = false;
         $message = false;
 
+        $store_manager = StoreManager::get_instance();
         if ( ! $video ) {
-            $message = __('Video URL is required.', 'evp_video_player');
+            $message = __( 'Video URL is required.', 'evp_video_player' );
         } else {
-            $object_id = evp_get_data_index( $playlist, 'object_id' );
+            $object_id = $store_manager->get_data_index( $playlist, 'object_id' );
             if ( ! $object_id ) {
-                $message = __('Video playlist does not exists.', 'evp_video_player');
+                $message = __( 'Video playlist does not exists.', 'evp_video_player' );
             } else {
-                $playlist_data = evp_get_data($playlist, false);
+                $playlist_data = $store_manager->get_data( $playlist, false );
                 $playlist_data = $playlist_data ? $playlist_data : array();
-                $videos  = isset($playlist_data['videos']) ? $playlist_data['videos'] : array();
-                $sources = isset($playlist_data['sources']) ? $playlist_data['sources'] : array();
+                $videos  = isset( $playlist_data['videos'] ) ? $playlist_data['videos'] : array();
+                $sources = isset( $playlist_data['sources'] ) ? $playlist_data['sources'] : array();
                 $is_video_exists = false;
-                foreach ($videos as $key => $video_data) {
-                    if ( isset($video_data['url']) && $video_data['url'] == $video ) {
+                foreach ( $videos as $key => $video_data ) {
+                    if ( isset( $video_data['url'] ) && $video_data['url'] == $video ) {
                         $is_video_exists = true;
                         break;
                     }
@@ -132,7 +137,7 @@ class Core extends Singleton {
                 if ( $is_video_exists ) {
                     $message = __('Video already exists.', 'evp_video_player');
                 } else {
-                    $video_data = evp_get_oembed_data($video);
+                    $video_data = Getters::get_oembed_data( $video );
                     if ( $video_data ) {
                         $video_list = isset( $video_data['video_list'] ) ? $video_data['video_list'] : array();
                         $source     = isset( $video_data['source'] ) ? $video_data['source'] : array();
@@ -141,9 +146,9 @@ class Core extends Singleton {
                         $sources = array_map( 'array_unique', $sources );
                         $playlist_data['videos']  = $videos;
                         $playlist_data['sources'] = $sources;
-                        evp_update_data($playlist, $playlist_data);
+                        $store_manager->update_data( $playlist, $playlist_data );
                         $success = true;
-                        $data    = evp_get_playlists();
+                        $data    = Getters::get_playlists();
                     }
                 }
             }
@@ -166,20 +171,21 @@ class Core extends Singleton {
      */
     public function delete_video() {
         // Nounce Verification.
-        check_ajax_referer('evp-admin-ajax-nonce', 'security');
+        check_ajax_referer( 'evp-admin-ajax-nonce', 'security' );
 
-        $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
-        $video = isset($_POST['video']) ? esc_url_raw(wp_unslash($_POST['video'])) : '';
-        $video_id = isset($_POST['video_id']) ? sanitize_text_field(wp_unslash($_POST['video_id'])) : '';
+        $playlist = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash( $_POST['playlist'] ) ) : '';
+        $video = isset( $_POST['video'] ) ? esc_url_raw( wp_unslash( $_POST['video'] ) ) : '';
+        $video_id = isset( $_POST['video_id'] ) ? sanitize_text_field( wp_unslash( $_POST['video_id'] ) ) : '';
 
         $success = false;
+        $store_manager = StoreManager::get_instance();
 
-        $data = evp_get_data($playlist, false);
-        $videos = isset($data['videos']) ? $data['videos'] : array();
+        $data = $store_manager->get_data( $playlist, false );
+        $videos = isset( $data['videos'] ) ? $data['videos'] : array();
         if ( isset( $videos[ $video_id ] ) ) {
-            unset($videos[ $video_id ]);
+            unset( $videos[ $video_id ] );
             $data['videos'] = $videos;
-            evp_update_data($playlist, $data);
+            $store_manager->update_data( $playlist, $data );
             $success = true;
         }
 
@@ -198,34 +204,35 @@ class Core extends Singleton {
      */
     public function edit_video_info() {
         // Nounce Verification.
-        check_ajax_referer('evp-admin-ajax-nonce', 'security');
+        check_ajax_referer( 'evp-admin-ajax-nonce', 'security' );
 
-        $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
-        $video = isset($_POST['video']) ? esc_url_raw(wp_unslash($_POST['video'])) : '';
-        $video_id = isset($_POST['video_id']) ? sanitize_text_field(wp_unslash($_POST['video_id'])) : '';
-        $title = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
-        $thumbnail = isset($_POST['thumb']) ? esc_url_raw(wp_unslash($_POST['thumb'])) : '';
-        $author = isset($_POST['author']) ? sanitize_text_field(wp_unslash($_POST['author'])) : '';
-        $author_url = isset($_POST['author_url']) ? esc_url_raw(wp_unslash($_POST['author_url'])) : '';
+        $playlist = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash($_POST['playlist'] ) ) : '';
+        $video = isset( $_POST['video'] ) ? esc_url_raw( wp_unslash( $_POST['video'] ) ) : '';
+        $video_id = isset( $_POST['video_id'] ) ? sanitize_text_field( wp_unslash($_POST['video_id'] ) ) : '';
+        $title = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash($_POST['title'] ) ) : '';
+        $thumbnail = isset( $_POST['thumb'] ) ? esc_url_raw( wp_unslash($_POST['thumb'] ) ) : '';
+        $author = isset( $_POST['author'] ) ? sanitize_text_field( wp_unslash( $_POST['author'] ) ) : '';
+        $author_url = isset( $_POST['author_url'] ) ? esc_url_raw( wp_unslash( $_POST['author_url'] ) ) : '';
 
         $success = false;
         $data = false;
+        $store_manager = StoreManager::get_instance();
 
-        $ndata = evp_get_data($playlist, false);
-        $videos = isset($ndata['videos']) ? $ndata['videos'] : array();
+        $ndata = $store_manager->get_data( $playlist, false );
+        $videos = isset( $ndata['videos'] ) ? $ndata['videos'] : array();
         if ( isset( $videos[ $video_id ] ) ) {
             $video_data = $videos[ $video_id ];
-            $thumb_url = isset($video_data['thumbnail_url']) && is_array($video_data['thumbnail_url']) ? $video_data['thumbnail_url'] : array();
-            array_unshift($thumb_url, $thumbnail);
+            $thumb_url = isset( $video_data['thumbnail_url'] ) && is_array( $video_data['thumbnail_url'] ) ? $video_data['thumbnail_url'] : array();
+            array_unshift( $thumb_url, $thumbnail );
             $video_data['thumbnail_url'] = $thumb_url;
-            $video_data['title'] = sanitize_text_field($title);
-            $video_data['author_name'] = sanitize_text_field($author);
-            $video_data['author_url'] = esc_url_raw($author_url);
+            $video_data['title'] = sanitize_text_field( $title );
+            $video_data['author_name'] = sanitize_text_field( $author );
+            $video_data['author_url'] = esc_url_raw( $author_url );
             $videos[ $video_id ] = $video_data;
             $ndata['videos'] = $videos;
-            evp_update_data($playlist, $ndata);
+            evp_update_data( $playlist, $ndata );
             $success = true;
-            $data = evp_get_playlists();
+            $data = Getters::get_playlists();
         }
 
         echo wp_json_encode(
@@ -244,17 +251,19 @@ class Core extends Singleton {
      */
     public function save_playlist_sorting() {
         // Nounce Verification.
-        check_ajax_referer('evp-admin-ajax-nonce', 'security');
+        check_ajax_referer( 'evp-admin-ajax-nonce', 'security' );
 
-        $playlist = isset($_POST['playlist']) ? sanitize_text_field(wp_unslash($_POST['playlist'])) : '';
-        $videos   = isset($_POST['videos']) ? array_map('esc_url_raw', wp_unslash($_POST['videos'])) : '';
-        $ids      = isset($_POST['ids']) ? array_map('sanitize_text_field', wp_unslash($_POST['ids'])) : '';
+        $playlist = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash( $_POST['playlist'] ) ) : '';
+        $videos   = isset( $_POST['videos'] ) ? array_map( 'esc_url_raw', wp_unslash( $_POST['videos'] ) ) : '';
+        $ids      = isset( $_POST['ids'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['ids'] ) ) : '';
 
-        $data = evp_get_data($playlist, false);
-        $old_videos = isset($data['videos']) ? $data['videos'] : array();
+        $store_manager = StoreManager::get_instance();
+
+        $data = $store_manager->get_data( $playlist, false );
+        $old_videos = isset( $data['videos'] ) ? $data['videos'] : array();
         $new_videos = array();
 
-        foreach ($ids as $id) {
+        foreach ( $ids as $id ) {
             if ( ! isset( $old_videos[ $id ] ) ) {
                 continue;
             }
@@ -262,7 +271,7 @@ class Core extends Singleton {
         }
 
         $data['videos'] = $new_videos;
-        evp_update_data($playlist, $data);
+        $store_manager->update_data( $playlist, $data );
         echo wp_json_encode(
             array(
                 'success' => true,
@@ -276,11 +285,11 @@ class Core extends Singleton {
      *
      * @since 1.0.0
      */
-    public function evp_save_api_key() {
+    public function save_api_key() {
         // Nounce Verification.
-        check_ajax_referer('evp-admin-ajax-nonce', 'security');
-        $key = isset($_POST['api_key']) ? sanitize_text_field(wp_unslash($_POST['api_key'])) : '';
-        $val = isset($_POST['api_val']) ? sanitize_text_field(wp_unslash($_POST['api_val'])) : '';
+        check_ajax_referer( 'evp-admin-ajax-nonce', 'security' );
+        $key = isset( $_POST['api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['api_key'] ) ) : '';
+        $val = isset( $_POST['api_val'] ) ? sanitize_text_field( wp_unslash( $_POST['api_val'] ) ) : '';
         $api = get_option( 'evp_settings_api' );
         $api = $api && is_array( $api ) ? $api : array();
         $api[ $key ] = $val;
