@@ -2,7 +2,7 @@ path = require('path');
 module.exports = {
 	entry: {
 		'backend/js/admin/admin'     : "./backend/js/admin/admin.js",
-		'assets/scripts/front/front' : "./assets/scripts/front/front.js",
+		'frontend/js/front'          : "./frontend/js/front.js",
 		'backend/js/block/block'     : "./backend/js/block/block.js",
 	},
 	output: {

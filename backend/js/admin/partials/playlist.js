@@ -1,4 +1,5 @@
-import { addVideoEditForm, addVideoForm } from '../../front/partials/templates';
+
+import { addVideoEditForm, addVideoForm } from '../../../../frontend/js/partials/templates';
 import { sprintf } from '../../lib/functions';
 import vars from './variables';
 
