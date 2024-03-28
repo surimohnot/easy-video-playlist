@@ -20,10 +20,10 @@ $active_tab = isset( $_GET['tab'] ) && array_key_exists( $_GET['tab'], $tabs ) ?
 ?>
 
 <article class="easy-video-playlist" id="easy-video-playlist">
-    <?php include_once Markup::get_partial('header'); ?>
+    <?php include_once Markup::get_admin_partial('header'); ?>
     <div class="evp-content" id="evp-content">
         <main class="evp-primary">
-            <?php include_once Markup::get_partial( $active_tab ); ?>
+            <?php include_once Markup::get_admin_partial( $active_tab ); ?>
         </main>
     </div>
     <div class="evp-action-feedback" id="evp-action-feedback">

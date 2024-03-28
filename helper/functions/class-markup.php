@@ -136,8 +136,8 @@ class Markup {
     /**
      * Get template partial path.
      */
-    public static function get_partial($partial) {
-        $path = EVP_DIR . 'helper/templates/partials/' . $partial . '.php';
-        return apply_filters( 'evp_get_partial', $partial, $path );
+    public static function get_admin_partial($partial) {
+        $path = EVP_DIR . 'backend/admin/templates/partials/' . $partial . '.php';
+        return apply_filters( 'evp_get_partial', $path, $partial );
     }
 }
