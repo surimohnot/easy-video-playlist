@@ -36,7 +36,6 @@ class Loader extends Singleton {
         }
         $this->enqueue_frontend_scripts();
         $this->enqueue_frontend_styles();
-        $this->add_playlist_svg_icons();
 	}
 
     /**

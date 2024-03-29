@@ -131,8 +131,7 @@ class Loader extends Singleton {
      * @since 1.1.0
      */
     public function add_icons() {
-        if ( file_exists( EVP_DIR . 'helper/assets/images/plyr.svg' ) ) {
-            include_once EVP_DIR . 'helper/assets/images/plyr.svg';
-        }
+        include_once EVP_DIR . 'helper/assets/images/icons.svg';
+        include_once EVP_DIR . 'helper/assets/images/plyr.svg';
     }
 }

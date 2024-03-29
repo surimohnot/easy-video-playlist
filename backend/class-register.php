@@ -67,7 +67,8 @@ class Register {
     public static function load_resources() {
         $loader = Loader::get_instance();
         add_action( 'enqueue_block_editor_assets', array( $loader, 'enqueue_editor_assets' ) );
-        add_action('admin_footer', array( $loader, 'add_icons' ), 9999);
+        add_action( 'admin_footer', array( $loader, 'add_icons' ), 9999 );
+        add_action( 'elementor/preview/enqueue_scripts', array( $loader, 'add_icons' ) );
     }
 
     /**

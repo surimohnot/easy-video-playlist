@@ -40,7 +40,6 @@ class Register {
     public static function load_resources() {
         $loader = Loader::get_instance();
         add_action( 'wp_footer', array( $loader, 'enqueue_frontend_assets' ) );
-        add_action( 'elementor/editor/before_enqueue_scripts', array( $loader, 'enqueue_frontend_assets' ) );
-        add_action( 'admin_footer', array( $loader, 'add_playlist_svg_icons' ) );
+        add_action( 'wp_footer', array( $loader, 'add_playlist_svg_icons' ) );
     }
 }
