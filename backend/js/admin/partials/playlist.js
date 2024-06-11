@@ -243,10 +243,10 @@ class Playlist {
             action: 'evp_add_new_video',
             security: vars.security,
             playlist: playList,
-            videourl: url,
-            videotype: type,
-            videoid: id,
-            videoprovider: provider,
+            url: url,
+            sourcetype: type,
+            sourceid: id,
+            provider: provider,
         };
         jQuery.post(vars.ajaxUrl, data, (response) => {
             if (response.success) {

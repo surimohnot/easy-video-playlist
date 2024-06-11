@@ -37,8 +37,14 @@ class Register {
         // Load plugin admin resources.
         self::load_resources();
 
+        // Register Custom Post Types Storage.
+        self::register_storage();
+
         // Register REST API functions.
         self::register_rest_api();
+
+        // Support AJAX functionality.
+        self::support_ajax_functionality();
 
 		// Register Easy Video Playlist widget.
 		self::register_widget();
@@ -46,14 +52,8 @@ class Register {
 		// Register Easy Video Playlist block.
 		self::register_block();
 
-		// Register Easy Video Playlist shortcode display method.
+		// Register Easy Video Playlist shortcode.
 		self::register_shortcode();
-
-        // Support AJAX functionality.
-        self::support_ajax_functionality();
-
-        // Register Custom Post Types Storage.
-        self::register_storage();
 
         // Initiate plugin's admin page.
 		Admin::init();
@@ -72,6 +72,16 @@ class Register {
     }
 
     /**
+     * Register Storage.
+     *
+     * @since 1.1.0
+     */
+    public static function register_storage() {
+        $store_manager = StoreManager::get_instance();
+        add_action( 'init', array( $store_manager, 'register' ) );
+    }
+
+    /**
      * Load admin specific resources.
      *
      * @since 1.1.0
@@ -79,6 +89,22 @@ class Register {
     public static function register_rest_api() {
         $loader = Loader::get_instance();
         add_action('rest_api_init', array( $loader, 'register_routes' ) );
+    }
+
+    /**
+	 * Support podcast player Ajax functionality scripts.
+	 *
+	 * @since 1.1.0
+	 */
+	public static function support_ajax_functionality() {
+        $core = Core::get_instance();
+        add_action( 'wp_ajax_evp_add_new_playlist', array( $core, 'add_new_playlist' ) );
+        add_action( 'wp_ajax_evp_delete_playlist', array( $core, 'delete_playlist' ) );
+        add_action( 'wp_ajax_evp_add_new_video', array( $core, 'add_new_video' ) );
+        add_action( 'wp_ajax_evp_delete_video', array( $core, 'delete_video' ) );
+        add_action( 'wp_ajax_evp_edit_video_info', array( $core, 'edit_video_info' ) );
+        add_action( 'wp_ajax_evp_save_playlist_sorting', array( $core, 'save_playlist_sorting' ) );
+        add_action( 'wp_ajax_evp_save_api_key', array( $core, 'save_api_key' ) );
     }
 
     /**
@@ -113,31 +139,5 @@ class Register {
     public static function register_shortcode() {
         $shortcode = Shortcode::get_instance();
         add_shortcode( 'evpvideoplaylist', array( $shortcode, 'render' ) );
-    }
-
-    /**
-     * Register Storage.
-     *
-     * @since 1.1.0
-     */
-    public static function register_storage() {
-        $store_manager = StoreManager::get_instance();
-        add_action( 'init', array( $store_manager, 'register' ) );
-    }
-
-    /**
-	 * Support podcast player Ajax functionality scripts.
-	 *
-	 * @since 1.1.0
-	 */
-	public static function support_ajax_functionality() {
-        $core = Core::get_instance();
-        add_action( 'wp_ajax_evp_add_new_playlist', array( $core, 'add_new_playlist' ) );
-        add_action( 'wp_ajax_evp_delete_playlist', array( $core, 'delete_playlist' ) );
-        add_action( 'wp_ajax_evp_add_new_video', array( $core, 'add_new_video' ) );
-        add_action( 'wp_ajax_evp_delete_video', array( $core, 'delete_video' ) );
-        add_action( 'wp_ajax_evp_edit_video_info', array( $core, 'edit_video_info' ) );
-        add_action( 'wp_ajax_evp_save_playlist_sorting', array( $core, 'save_playlist_sorting' ) );
-        add_action( 'wp_ajax_evp_save_api_key', array( $core, 'save_api_key' ) );
     }
 }
