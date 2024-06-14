@@ -136,7 +136,7 @@ class Core extends Singleton {
 				$sources = isset( $playlist_data['sources'] ) ? $playlist_data['sources'] : array();
 				$is_video_exists = false;
 				foreach ( $videos as $key => $video_data ) {
-					if ( isset( $video_data['url'] ) && $video_data['url'] == $video ) {
+					if ( isset( $video_data['url'] ) && $video_data['url'] == $url ) {
 						$is_video_exists = true;
 						break;
 					}
@@ -144,7 +144,7 @@ class Core extends Singleton {
 				if ( $is_video_exists ) {
 					$message = __('Video already exists.', 'evp_video_player');
 				} else {
-					$video_data = Getters::get_oembed_data( $video );
+					$video_data = Getters::get_oembed_data( $url );
 					if ( $video_data ) {
 						$video_list = isset( $video_data['video_list'] ) ? $video_data['video_list'] : array();
 						$source     = isset( $video_data['source'] ) ? $video_data['source'] : array();
