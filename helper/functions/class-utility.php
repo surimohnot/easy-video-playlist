@@ -85,7 +85,7 @@ class Utility {
 	 *
 	 * @param string $str String to convert.
 	 */
-	public function to_snake_case( $str ) {
+	public static function to_snake_case( $str ) {
 		return strtolower( preg_replace( '/(?<!^)[A-Z]/', '_$0', $str ) );
 	}
 }

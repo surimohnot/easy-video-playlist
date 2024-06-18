@@ -65,7 +65,12 @@ class StoreManager extends Singleton {
 			return $post_id;
 		}
 		// Index the bucket.
-		return $this->add_to_index( $key, $post_id, $label );
+		$this->add_to_index( $key, $post_id, $label );
+
+		// Create a empty playlist data object.
+		$data = new PlaylistData();
+		$data->set( 'title', $label );
+		$this->update_data( $key, $data );
 	}
 
 	/**
@@ -113,7 +118,11 @@ class StoreManager extends Singleton {
 	public function get_data( $key, $escape = true ) {
 		$object_id = $this->get_data_index( $key, 'object_id' );
 		if ( $object_id ) {
-			return get_post_meta( $object_id, 'default_data', true );
+			$data = get_post_meta( $object_id, 'default_data', true );
+			if ( ! $data ) {
+				$data = new PlaylistData();
+			}
+			return $data;
 		}
 		return false;
 	}

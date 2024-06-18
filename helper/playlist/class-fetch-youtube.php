@@ -1,6 +1,6 @@
 <?php
 /**
- * Easy Video Playlist Validation Functions.
+ * Fetch Video Data from YouTube.
  *
  * @since   1.1.0
  *
@@ -15,7 +15,7 @@ use Easy_Video_Playlist\Helper\Functions\Getters as Get_Fn;
 use Easy_Video_Playlist\Helper\Functions\Validation;
 
 /**
- * Easy Video Playlist Validation Functions.
+ * Fetch Video Data from YouTube.
  *
  * @since 1.1.0
  */
@@ -48,88 +48,169 @@ class Fetch_Youtube extends Singleton {
 		$settings_api          = get_option( 'evp_settings_api' );
 		$settings_api          = $settings_api && is_array( $settings_api ) ? $settings_api : array();
 		$this->youtube_api_key = isset( $settings_api['youtube'] ) ? $settings_api['youtube'] : false;
+		$this->max_results     = apply_filters( 'evp_youtube_max_results', $this->max_results );
+	}
+
+	/**
+	 * Get YouTube video data from the provided source.
+	 *
+	 * @since  1.2.0
+	 *
+	 * @return array Return indexed array of Video Data objects.
+	 *
+	 * @param string $source_id   Source ID.
+	 * @param string $source_type Source Type.
+	 */
+	public function get_data( $source_id, $source_type ) {
+		if ( ! $this->youtube_api_key ) {
+			if ( 'video' !== $source_type ) {
+				return array(); // Only Video type is supported without YouTube API key.
+			}
+			return $this->get_data_without_api_key( $source_id );
+		}
+		return $this->get_data_with_api_key( $source_id, $source_type );
+	}
+
+	/**
+	 * Get YouTube video data from the video ID without API key.
+	 *
+	 * Using oEmbed to fetch limited video data from YouTube.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param string $video_id Video ID.
+	 */
+	public function get_data_without_api_key( $video_id ) {
+		$data = array();
+		$yt_video_url = 'https://www.youtube.com/watch?v=' . $video_id;
+		$query_params = array(
+			'format' => 'json',
+			'url'    => $yt_video_url,
+		);
+		// Final URL with query parameters.
+		$final_url    = add_query_args( $query_params, 'https://www.youtube.com/oembed' );
+		$vid_data     = Get_Fn::get_remote_data( $final_url );
+		$video_object = $vid_data ? $this->get_no_api_data_object( $vid_data, $video_id ) : false;
+		if ( ! $video_object || ! $video_object instanceof VideoData ) {
+			return array();
+		}
+		$data[] = $video_object;
+		return $data;
+	}
+
+	/**
+	 * Get YouTube video data from the video ID with API key.
+	 *
+	 * Use API to fetch full video data from YouTube.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param string $source_id   Source ID.
+	 * @param string $source_type Source Type.
+	 */
+	public function get_data_with_api_key( $source_id, $source_type ) {
+		switch ( $source_type ) {
+			case 'video':
+				$video_ids = array( $source_id );
+				break;
+			case 'playlist':
+				$video_ids = $this->get_ids_from_playlist( $source_id );
+				break;
+			case 'channel':
+				$video_ids = $this->get_ids_from_channel( $source_id );
+				break;
+			case 'channelUser':
+				$video_ids = $this->get_ids_from_channeluser( $source_id );
+				break;
+			case 'user':
+				$video_ids = $this->video_ids_from_user( $source_id );
+				break;
+			default:
+				$video_ids = array();
+		}
+		return $this->get_video_data_from_api( $video_ids );
 	}
 
 	/**
 	 * Get YouTube video IDs from the playlist.
 	 *
-	 * @since  1.1.0
+	 * @since  1.2.0
 	 *
 	 * @param string $playlist_id Playlist ID.
 	 */
-	public function video_ids_from_playlist( $playlist_id ) {
+	public function get_ids_from_playlist( $playlist_id ) {
 		if ( ! $this->youtube_api_key ) {
-			return array(); // TODO: Some sort of error handling is required here.
+			return array();
 		}
 
-		$request_url = 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=' . $playlist_id . '&key=' . $this->youtube_api_key;
-		return $this->multi_fetch_yt_video_ids_from_url( $request_url, 'playlist' );
+		$request_url = 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=40&playlistId=' . $playlist_id . '&key=' . $this->youtube_api_key;
+		return $this->multi_fetch_video_ids_from_url( $request_url, 'playlist' );
 	}
 
 	/**
 	 * Get YouTube video IDs from the channel.
 	 *
-	 * @since  1.1.0
+	 * @since  1.2.0
 	 *
 	 * @param string $channel_id Channel ID.
 	 */
-	public function video_ids_from_channel( $channel_id ) {
+	public function get_ids_from_channel( $channel_id ) {
 		if ( ! $this->youtube_api_key ) {
-			return array(); // TODO: Some sort of error handling is required here.
+			return array();
 		}
 
-		$request_url = 'https://www.googleapis.com/youtube/v3/search?part=id&channelId=' . $channel_id . '&maxResults=50&type=video&key=' . $this->youtube_api_key;
-		return $this->multi_fetch_yt_video_ids_from_url( $request_url, 'channel' );
-	}
-
-	/**
-	 * Get YouTube video IDs from the user ID.
-	 *
-	 * @since  1.1.0
-	 *
-	 * @param string $username User Name.
-	 */
-	public function video_ids_from_user( $username ) {
-		if ( ! $this->youtube_api_key ) {
-			return array(); // TODO: Some sort of error handling is required here.
-		}
-
-		$request_url  = 'https://www.googleapis.com/youtube/v3/channels?part=id&forUsername=' . $username . '&key=' . $this->youtube_api_key;
-		$all_channels = Get_Fn::get_remote_data( $request_url );
-		if ( ! $all_channels || ! is_array( $all_channels ) || ! isset( $all_channels['items'] ) || ! isset( $all_channels['items'][0]['id'] ) ) {
-			return array(); // TODO: Some sort of error handling is required here.
-		}
-
-		// Get first channel ID of the channel user.
-		$first_channel_id = $all_channels['items'][0]['id'];
-
-		// Use available method to fetch video IDs from a given channel ID.
-		return $this->get_yt_video_ids_from_channel( $first_channel_id );
+		$request_url = 'https://www.googleapis.com/youtube/v3/search?part=id&channelId=' . $channel_id . '&maxResults=40&type=video&key=' . $this->youtube_api_key;
+		return $this->multi_fetch_video_ids_from_url( $request_url, 'channel' );
 	}
 
 	/**
 	 * Get YouTube video IDs from the channel user ID.
 	 *
-	 * @since  1.1.0
+	 * @since  1.2.0
 	 *
 	 * @param string $handle Channel Handle ID.
 	 */
-	public function video_ids_from_channeluser( $handle ) {
+	public function get_ids_from_channeluser( $handle ) {
 		if ( ! $this->youtube_api_key ) {
-			return array(); // TODO: Some sort of error handling is required here.
+			return array();
 		}
 
 		$request_url  = 'https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=' . $handle . '&key=' . $this->youtube_api_key;
 		$all_channels = Get_Fn::get_remote_data( $request_url );
 		if ( ! $all_channels || ! is_array( $all_channels ) || ! isset( $all_channels['items'] ) || ! isset( $all_channels['items'][0]['id'] ) ) {
-			return array(); // TODO: Some sort of error handling is required here.
+			return array();
 		}
 
 		// Get first channel ID of the channel user.
 		$first_channel_id = $all_channels['items'][0]['id'];
 
 		// Use available method to fetch video IDs from a given channel ID.
-		return $this->get_yt_video_ids_from_channel( $first_channel_id );
+		return $this->get_ids_from_channel( $first_channel_id );
+	}
+
+	/**
+	 * Get YouTube video IDs from the user ID.
+	 *
+	 * @since  1.2.0
+	 *
+	 * @param string $username User Name.
+	 */
+	public function get_ids_from_user( $username ) {
+		if ( ! $this->youtube_api_key ) {
+			return array();
+		}
+
+		$request_url  = 'https://www.googleapis.com/youtube/v3/channels?part=id&forUsername=' . $username . '&key=' . $this->youtube_api_key;
+		$all_channels = Get_Fn::get_remote_data( $request_url );
+		if ( ! $all_channels || ! is_array( $all_channels ) || ! isset( $all_channels['items'] ) || ! isset( $all_channels['items'][0]['id'] ) ) {
+			return array();
+		}
+
+		// Get first channel ID of the channel user.
+		$first_channel_id = $all_channels['items'][0]['id'];
+
+		// Use available method to fetch video IDs from a given channel ID.
+		return $this->get_ids_from_channel( $first_channel_id );
 	}
 
 	/**
@@ -140,9 +221,9 @@ class Fetch_Youtube extends Singleton {
 	 * @param string $request_url Request URL.
 	 * @param string $context Context.
 	 */
-	private function multi_fetch_yt_video_ids_from_url( $request_url, $context ) {
+	private function multi_fetch_video_ids_from_url( $request_url, $context ) {
 		// Fetch first batch of video IDs from the request URL.
-		list( $ids, $next_page_token ) = $this->fetch_yt_video_ids_from_url( $request_url, $context );
+		list( $ids, $next_page_token ) = $this->fetch_video_ids_from_url( $request_url, $context );
 
 		// If no video IDs are found, return empty array.
 		if ( ! $ids ) {
@@ -153,7 +234,7 @@ class Fetch_Youtube extends Singleton {
 		$total = count( $ids );
 		while ( $total < $this->max_results && $next_page_token ) {
 			$request_url                   .= '&pageToken=' . $next_page_token;
-			list( $nids, $next_page_token ) = $this->fetch_yt_video_ids_from_url( $request_url, $context );
+			list( $nids, $next_page_token ) = $this->fetch_video_ids_from_url( $request_url, $context );
 			$ids                            = array_merge( $ids, $nids );
 			$total                          = count( $ids );
 		}
@@ -169,13 +250,13 @@ class Fetch_Youtube extends Singleton {
 	 * @param string $request_url Request URL.
 	 * @param string $context Context.
 	 */
-	private function fetch_yt_video_ids_from_url( $request_url, $context ) {
+	private function fetch_video_ids_from_url( $request_url, $context ) {
 		$ids  = array();
 		$data = Get_Fn::get_remote_data( $request_url );
 		if ( ! $data || ! is_array( $data ) || ! isset( $data['pageInfo'] ) || ! isset( $data['items'] ) ) {
 			return $ids;
 		}
-		$ids             = array_merge( $ids, $this->get_yt_video_ids_from_array( $data['items'], $context ) );
+		$ids             = array_merge( $ids, $this->get_video_ids_from_array( $data['items'], $context ) );
 		$next_page_token = isset( $data['nextPageToken'] ) && $data['nextPageToken'] ? $data['nextPageToken'] : false;
 		return array( $ids, $next_page_token );
 	}
@@ -188,7 +269,7 @@ class Fetch_Youtube extends Singleton {
 	 * @param array  $items Items.
 	 * @param string $context Context.
 	 */
-	private function get_yt_video_ids_from_array( $items, $context ) {
+	private function get_video_ids_from_array( $items, $context ) {
 		$ids = array();
 		foreach ( $items as $item ) {
 			if ( strpos( $context, 'channel' ) !== false ) {
@@ -206,50 +287,6 @@ class Fetch_Youtube extends Singleton {
 	}
 
 	/**
-	 * Get YouTube video data from the video IDs.
-	 *
-	 * @since  1.2.0
-	 *
-	 * @param array $video_ids Video IDs.
-	 */
-	public function video_data( $video_ids ) {
-		if ( ! $this->youtube_api_key ) {
-			return $this->video_data_without_api_key( $video_ids );
-		}
-		return $this->video_data_with_api_key( $video_ids );
-	}
-
-	/**
-	 * Get YouTube video data from the video IDs without API key.
-	 *
-	 * @since  1.2.0
-	 *
-	 * @param array $video_ids Video IDs.
-	 */
-	public function video_data_without_api_key( $video_ids ) {
-		$data = array();
-
-		foreach ( $video_ids as $video_id => $source ) {
-			$yt_video_url = 'https://www.youtube.com/watch?v=' . $video_id;
-			$query_params = array(
-				'format' => 'json',
-				'url'    => $yt_video_url,
-			);
-
-			// Final URL with query parameters.
-			$final_url    = add_query_args( $query_params, 'https://www.youtube.com/oembed' );
-			$vid_data     = Get_Fn::get_remote_data( $final_url );
-			$video_object = $vid_data ? $this->video_data_object( $vid_data, $video_id ) : false;
-			if ( ! $video_object || ! $video_object instanceof VideoData ) {
-				continue;
-			}
-			$data[] = $video_object;
-		}
-
-		return $data;
-	}
-
-	/**
 	 * Get YouTube video data object.
 	 *
 	 * @since  1.2.0
@@ -257,7 +294,7 @@ class Fetch_Youtube extends Singleton {
 	 * @param array  $item Item.
 	 * @param string $id ID.
 	 */
-	private function video_data_object( $item, $id ) {
+	private function get_no_api_data_object( $item, $id ) {
 		if ( ! $item || ! is_array( $item ) ) {
 			return false;
 		}
@@ -295,14 +332,14 @@ class Fetch_Youtube extends Singleton {
 	 *
 	 * @param array $video_ids Video IDs.
 	 */
-	public function video_data_with_api_key( $video_ids ) {
+	public function get_video_data_from_api( $video_ids ) {
 
 		// Convert $video_ids array to small chunks of 40 IDs.
 		$chunked_video_ids = array_chunk( array_unique( $video_ids ), 40 );
 
 		$data = array();
 		foreach ( $chunked_video_ids as $chunk ) {
-			$request_url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=' . implode( ',', array_keys( $chunk ) ) . '&key=' . $this->youtube_api_key;
+			$request_url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,status,statistics&id=' . implode( ',', $chunk ) . '&key=' . $this->youtube_api_key;
 			$chunk_data  = Get_Fn::get_remote_data( $request_url );
 			if ( ! $chunk_data || ! is_array( $chunk_data ) || ! isset( $chunk_data['items'] ) ) {
 				continue;
@@ -310,10 +347,10 @@ class Fetch_Youtube extends Singleton {
 			$items = $chunk_data['items'];
 			foreach ( $items as $item ) {
 				$item_id = isset( $item['id'] ) ? sanitize_text_field( $item['id'] ) : false;
-				if ( ! $item_id || ! isset( $video_ids[ $item_id ] ) ) {
+				if ( ! $item_id || ! in_array( $item_id, $video_ids ) ) {
 					continue;
 				}
-				$video_api_data = $this->video_api_data_object( $item, $video_ids[ $item_id ] );
+				$video_api_data = $this->get_api_data_object( $item, $item_id );
 				if ( ! $video_api_data || ! $video_api_data instanceof VideoData ) {
 					continue;
 				}
@@ -332,7 +369,7 @@ class Fetch_Youtube extends Singleton {
 	 * @param array $item   Item.
 	 * @param array $source Source Information.
 	 */
-	private function video_api_data_object( $item, $source ) {
+	private function get_api_data_object( $item, $source ) {
 		$item_id = isset( $item['id'] ) ? $item['id'] : false;
 		if ( ! $item_id ) {
 			return false;

@@ -14,6 +14,8 @@ use Easy_Video_Playlist\Helper\Functions\Getters;
 use Easy_Video_Playlist\Helper\Store\StoreManager;
 use Easy_Video_Playlist\Helper\Playlist\Get_Playlist;
 use Easy_Video_Playlist\Helper\Store\PlaylistData;
+use Easy_Video_Playlist\Helper\Store\VideoData;
+use Easy_Video_Playlist\Helper\Store\SourceData;
 use Easy_Video_Playlist\Helper\Playlist\Fetch_YouTube;
 use Easy_Video_Playlist\Helper\Playlist\Fetch_Vimeo;
 
@@ -182,13 +184,17 @@ class Core extends Singleton {
 
 		// Get Playlist Name.
 		$playlist    = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash( $_POST['playlist'] ) ) : '';
-		$url         = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ) ) : '';
+		$url         = isset( $_POST['url'] ) ? untrailingslashit( esc_url_raw( wp_unslash( $_POST['url'] ) ) ) : '';
 		$source_type = isset( $_POST['sourcetype'] ) ? sanitize_text_field( wp_unslash( $_POST['sourcetype'] ) ) : '';
 		$source_id   = isset( $_POST['sourceid'] ) ? sanitize_text_field( wp_unslash( $_POST['sourceid'] ) ) : '';
 		$provider    = isset( $_POST['provider'] ) ? sanitize_text_field( wp_unslash( $_POST['provider'] ) ) : '';
 		$success     = false;
 		$data        = false;
 		$message     = false;
+
+		if ( 'url' === $provider ) {
+			$source_id = md5( $url );
+		}
 
 		$store_manager = StoreManager::get_instance();
 		if ( ! $url ) {
@@ -200,52 +206,59 @@ class Core extends Singleton {
 				$message = __( 'Incorrect Playlist data available.', 'evp_video_player' );
 				// TODO: Probably delete playlist data object.
 			} else {
-				$sources = $p_data->get( 'sources' );
-				$videos  = $p_data->get( 'videos' );
-				$all_ids = array_merge( array_values( $sources ) );
-				if ( in_array( $source_id, $all_ids, true ) ) {
-					$message = __( 'Video already exists.', 'evp_video_player' );
-				} elseif ( 'youtube' === $provider ) {
+				$sources    = $p_data->get( 'sources' );
+				$videos     = $p_data->get( 'videos' );
+				$video_arr  = array();
+				$source_arr = array();
+
+				foreach ( $sources as $source ) {
+					if ( ! $source || ! $source instanceof SourceData ) {
+						continue;
+					}
+
+					$id                = $source->get( 'id' );
+					$source_arr[ $id ] = $source;
+				}
+				foreach ( $videos as $video ) {
+					if ( ! $video || ! $video instanceof VideoData ) {
+						continue;
+					}
+					$id               = $video->get( 'id' );
+					$video_arr[ $id ] = $video;
+				}
+				$video_data = array();
+				if ( 'youtube' === $provider ) {
 					$yt_obj     = Fetch_YouTube::get_instance();
 					$video_data = $yt_obj->get_data( $source_id, $source_type );
 				} elseif ( 'vimeo' === $provider ) {
 					$vm_obj     = Fetch_Vimeo::get_instance();
 					$video_data = $vm_obj->get_data( $source_id, $source_type );
+				} elseif ( 'url' === $provider ) {
+					$url_obj    = Fetch_Url::get_instance();
+					$video_data = $url_obj->get_data( $url );
 				}
-			}
-
-
-			$object_id = $store_manager->get_data_index( $playlist, 'object_id' );
-			if ( ! $object_id ) {
-				$message = __( 'Video playlist does not exists.', 'evp_video_player' );
-			} else {
-				$playlist_data = $store_manager->get_data( $playlist, false ); // TODO: Here we will use the get_playlist class.
-				$playlist_data = $playlist_data ? $playlist_data : array();
-				$videos  = isset( $playlist_data['videos'] ) ? $playlist_data['videos'] : array();
-				$sources = isset( $playlist_data['sources'] ) ? $playlist_data['sources'] : array();
-				$is_video_exists = false;
-				foreach ( $videos as $key => $video_data ) {
-					if ( isset( $video_data['url'] ) && $video_data['url'] == $video ) {
-						$is_video_exists = true;
-						break;
+				if ( ! empty( $video_data ) && is_array( $video_data ) ) { 
+					foreach ( $video_data as $vdata ) {
+						if ( ! $vdata || ! $vdata instanceof VideoData ) {
+							continue;
+						}
+						$id = $vdata->get( 'id' );
+						$video_arr[ $id ] = $vdata;
 					}
-				}
-				if ( $is_video_exists ) {
-					$message = __('Video already exists.', 'evp_video_player');
-				} else {
-					$video_data = Getters::get_oembed_data( $video );
-					if ( $video_data ) {
-						$video_list = isset( $video_data['video_list'] ) ? $video_data['video_list'] : array();
-						$source     = isset( $video_data['source'] ) ? $video_data['source'] : array();
-						$videos  = array_merge( $videos, $video_list );
-						$sources = array_merge_recursive( $sources, array( $source ) );
-						$sources = array_map( 'array_unique', $sources );
-						$playlist_data['videos']  = $videos;
-						$playlist_data['sources'] = $sources;
-						$store_manager->update_data( $playlist, $playlist_data );
-						$success = true;
-						$data    = Getters::get_playlists();
+
+					if ( 'video' !== $source_type ) {
+						$new_source = new SourceData();
+						$new_source->set( 'prvider', $provider );
+						$new_source->set( 'id', $source_id );
+						$new_source->set( 'type', $source_type );
+						$source_arr[ $source_id ] = $new_source;
 					}
+
+					$p_data->set( 'sources', array_values( $sources ) );
+					$p_data->set( 'videos', array_values( $video_arr ) );
+					$store_manager->update_data( $playlist, $p_data );
+					$success = true;
+					$data    = Getters::get_playlists();
 				}
 			}
 		}
@@ -288,6 +301,118 @@ class Core extends Singleton {
 		echo wp_json_encode(
 			array(
 				'success' => $success,
+			)
+		);
+		wp_die();
+	}
+
+	/**
+	 * Ajax Callback to delete video from an existing playlist.
+	 *
+	 * @since 1.0.0
+	 */
+	public function delete_video_new() {
+		// Nounce Verification.
+		check_ajax_referer( 'evp-admin-ajax-nonce', 'security' );
+
+		$playlist = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash( $_POST['playlist'] ) ) : '';
+		$video    = isset( $_POST['video'] ) ? esc_url_raw( wp_unslash( $_POST['video'] ) ) : '';
+		$video_id = isset( $_POST['video_id'] ) ? sanitize_text_field( wp_unslash( $_POST['video_id'] ) ) : '';
+
+		$success = false;
+		$store_manager = StoreManager::get_instance();
+
+		$obj  = new Get_Playlist( $playlist );
+		$data = $obj->init();
+
+		if ( $data && $data instanceof PlaylistData ) {
+			$videos    = $data->get( 'videos' );
+			$video_arr = array();
+			foreach ( $videos as $video ) {
+				if ( ! $video || ! $video instanceof VideoData ) {
+					continue;
+				}
+				$id = $video->get( 'id' );
+				if ( $id === $video_id ) {
+					$success = true;
+					continue;
+				}
+				$video_arr[ $id ] = $video;
+			}
+
+			$data->set( 'videos', array_values( $video_arr ) );
+			$store_manager->update_data( $playlist, $data );
+		}
+
+		echo wp_json_encode(
+			array(
+				'success' => $success,
+			)
+		);
+		wp_die();
+	}
+
+	/**
+	 * Ajax Callback to edit information about an existing video.
+	 *
+	 * @since 1.0.0
+	 */
+	public function edit_video_info_new() {
+		// Nounce Verification.
+		check_ajax_referer( 'evp-admin-ajax-nonce', 'security' );
+
+		$playlist = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash($_POST['playlist'] ) ) : '';
+		$video = isset( $_POST['video'] ) ? esc_url_raw( wp_unslash( $_POST['video'] ) ) : '';
+		$video_id = isset( $_POST['video_id'] ) ? sanitize_text_field( wp_unslash($_POST['video_id'] ) ) : '';
+
+		$a_data = array(
+			'title' => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash($_POST['title'] ) ) : '',
+			'author' => isset( $_POST['author'] ) ? sanitize_text_field( wp_unslash( $_POST['author'] ) ) : '',
+			'author_url' => isset( $_POST['author_url'] ) ? esc_url_raw( wp_unslash( $_POST['author_url'] ) ) : '',
+			'thumbnail_url' => isset( $_POST['thumb'] ) ? esc_url_raw( wp_unslash($_POST['thumb'] ) ) : '',
+		);
+
+		$success       = false;
+		$data          = false;
+		$video_arr     = array();
+		$store_manager = StoreManager::get_instance();
+
+		$obj    = new Get_Playlist( $playlist );
+		$p_data = $obj->init();
+
+		if ( $p_data && $p_data instanceof PlaylistData ) {
+			$videos   = $p_data->get( 'videos' );
+			$curVideo = false;
+			foreach ( $videos as $video ) {
+				$id = $video->get( 'id' );
+				$video_arr[ $id ] = $video;
+			}
+		}
+
+		if ( isset( $video_arr[ $video_id ] ) ) {
+			$cur_video = $video_arr[ $video_id ];
+			foreach ( $a_data as $key => $value ) {
+				if ( 'thumbnail_url' === $key ) {
+					$thumb_url = $cur_video->get( 'thumbnail_url' );
+					array_unshift( $thumb_url, $value );
+					$value = array_unique( $thumb_url );
+				}
+				if ( $value && $cur_video->get( $key ) !== $value ) {
+					$cur_video->set_custom( $key, $value );
+				}
+			}
+
+			$video_arr[ $video_id ] = $cur_video;
+			$p_data->set( 'videos', array_values( $video_arr ) );
+			$store_manager->update_data( $playlist, $p_data );
+			$success = true;
+			$data = Getters::get_playlists();
+		}
+
+		echo wp_json_encode(
+			array(
+				'success' => $success,
+				'data'    => $data,
 			)
 		);
 		wp_die();
@@ -371,6 +496,37 @@ class Core extends Singleton {
 		echo wp_json_encode(
 			array(
 				'success' => true,
+			)
+		);
+		wp_die();
+	}
+
+	/**
+	 * Ajax Callback to modify playlist video sort order.
+	 *
+	 * @since 1.0.0
+	 */
+	public function save_playlist_sorting_new() {
+		// Nounce Verification.
+		check_ajax_referer( 'evp-admin-ajax-nonce', 'security' );
+
+		$playlist = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash( $_POST['playlist'] ) ) : '';
+		$ids      = isset( $_POST['ids'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['ids'] ) ) : '';
+		$success  = false;
+
+		$store_manager = StoreManager::get_instance();
+
+		$obj    = new Get_Playlist( $playlist );
+		$p_data = $obj->init();
+
+		if ( $p_data && $p_data instanceof PlaylistData ) {
+			$p_data->set( 'sort_order', $ids );
+			$store_manager->update_data( $playlist, $p_data );
+			$success = true;
+		}
+		echo wp_json_encode(
+			array(
+				'success' => $success,
 			)
 		);
 		wp_die();

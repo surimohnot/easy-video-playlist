@@ -82,6 +82,9 @@ class StoreBase {
 	 * @param string $context Context.
 	 */
 	protected function title( $val, $context ) {
+		if ( ! $val ) {
+			return '';
+		}
 		if ( 'sanitize' === $context ) {
 			return wp_kses_post( wp_check_invalid_utf8( htmlspecialchars_decode( $val ) ) );
 		} else {
@@ -98,6 +101,9 @@ class StoreBase {
 	 * @param string $context Context.
 	 */
 	protected function desc( $val, $context ) {
+		if ( ! $val ) {
+			return '';
+		}
 		if ( 'sanitize' === $context ) {
 			return wp_kses_post( wp_check_invalid_utf8( $val ) );
 		} else {
@@ -144,15 +150,51 @@ class StoreBase {
 	protected function arr_arr_string( $val, $context ) {
 		$value = array();
 		if ( 'sanitize' === $context ) {
-			return array_combine(
-				array_map( 'sanitize_text_field', array_keys( $val ) ),
-				array_map( 'sanitize_text_field', array_values( $val ) )
-			);
+			return sanitize_array_recursive( $val );
 		} else {
-			return array_combine(
-				array_map( 'esc_html', array_keys( $val ) ),
-				array_map( 'esc_html', array_values( $val ) )
-			);
+			return esc_array_recursive( $val );
+		}
+	}
+
+	/**
+	 * Sanitize Array Recursively.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Value to escape.
+	 */
+	private function sanitize_array_recursive( $data ) {
+		if (is_array($data)) {
+			$sanitized_data = array();
+			foreach ($data as $key => $value) {
+				$sanitized_key   = sanitize_text_field($key);
+				$sanitized_value = $this->sanitize_array_recursive($value);
+				$sanitized_data[$sanitized_key] = $sanitized_value;
+			}
+			return $sanitized_data;
+		} else {
+			return sanitize_text_field($data);
+		}
+	}
+
+	/**
+	 * Escape Array Recursively.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $data Value to escape.
+	 */
+	private function esc_array_recursive( $data ) {
+		if (is_array($data)) {
+			$escaped_data = array();
+			foreach ($data as $key => $value) {
+				$escaped_key   = esc_html($key);
+				$escaped_value = $this->esc_array_recursive($value);
+				$escaped_data[$escaped_key] = $escaped_value;
+			}
+			return $escaped_data;
+		} else {
+			return esc_html($data);
 		}
 	}
 
@@ -292,9 +334,14 @@ class StoreBase {
 	public function get( $name, $context = 'echo' ) {
 		if ( ! is_array( $name ) ) {
 			if ( property_exists( $this, $name ) ) {
+				if ( isset( $this->custom_values[ $name ] ) ) {
+					$val = $this->custom_values[ $name ];
+				} else {
+					$val = $this->$name;
+				}
 				$esc_arr = $this->typeDeclaration();
 				$esc     = isset( $esc_arr[ $name ] ) ? $esc_arr[ $name ] : 'string';
-				return $this->$esc( $this->$name, $context );
+				return $this->$esc( $val, $context );
 			}
 			return '';
 		}
@@ -303,5 +350,37 @@ class StoreBase {
 			$return[ $key ] = $this->get( $key, $context );
 		}
 		return $return;
+	}
+
+	/**
+	 * Set method specifically to store modified values of object properties.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string|array $name    Name or array of names.
+	 * @param mixed        $value   Value to be set.
+	 * @param string       $context Context.
+	 */
+	public function set_custom( $name, $value = false, $context = 'sanitize' ) {
+		if ( ! is_array( $name ) ) {
+			if ( property_exists( $this, $name ) ) {
+				if ( 'none' === $context ) {
+					$this->custom_values[ $name ] = $value;
+					return true;
+				}
+				$sanitize_arr = $this->typeDeclaration();
+				$sanitize     = isset( $sanitize_arr[ $name ] ) ? $sanitize_arr[ $name ] : 'string';
+				if ( method_exists( $this, $sanitize ) ) {
+					$this->custom_values[ $name ] = $this->$sanitize( $value, $context );
+				} else {
+					return false;
+				}
+				return true;
+			}
+			return false;
+		}
+		foreach ( $name as $k => $v ) {
+			$this->set_custom( $k, $v, $context );
+		}
 	}
 }

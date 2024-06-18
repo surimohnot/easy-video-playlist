@@ -10,6 +10,8 @@
 namespace Easy_Video_Playlist\Helper\Functions;
 
 use Easy_Video_Playlist\Helper\Store\StoreManager;
+use Easy_Video_Playlist\Helper\Playlist\Get_Playlist;
+use Easy_Video_Playlist\Helper\Store\PlaylistData;
 
 /**
  * Base class to get various playlist information.
@@ -47,12 +49,16 @@ class Getters {
 		$playlists     = array();
 		$pl_index      = $store_manager->get_register();
 		foreach ( $pl_index as $key => $value ) {
-			$title             = $value['bucket_title'];
-			$key               = sanitize_text_field( $key );
-			$data              = $store_manager->get_data( $key );
+			$title  = $value['bucket_title'];
+			$key    = sanitize_text_field( $key );
+			$obj    = new Get_Playlist( $key );
+			$p_data = $obj->init();
+			if ( ! $p_data || ! $p_data instanceof PlaylistData ) {
+				continue;
+			}
 			$playlists[ $key ] = array(
 				'title'  => esc_html( $title ),
-				'videos' => isset( $data['videos'] ) && $data['videos'] ? $data['videos'] : array(),
+				'videos' => $p_data->get_videos(),
 			);
 		}
 		return $playlists;
@@ -329,12 +335,14 @@ class Getters {
 	 * @since 1.0.0
 	 */
 	public static function get_playlist_index() {
-		$playlists = self::get_playlists();
-		$pl_index  = array( '' => __( 'Select Playlist' ) );
+		$store_manager = StoreManager::get_instance();
+		$pl_index      = array( '' => __( 'Select Playlist' ) );
+		$playlists     = $store_manager->get_register();
 		foreach ( $playlists as $key => $value ) {
-			$key              = esc_html( $key );
-			$pl_index[ $key ] = isset( $value['title'] ) ? esc_html( $value['title'] ) : '';
+			$title            = isset( $value['bucket_title'] ) ? $value['bucket_title'] : 'Untitled Playlist';
+			$key              = sanitize_text_field( $key );
+			$pl_index[ $key ] = esc_html( $title );
 		}
-		return array_filter( $pl_index );
+		return $pl_index;
 	}
 }

@@ -12,6 +12,7 @@ namespace Easy_Video_Playlist\Helper\Playlist;
 use Easy_Video_Playlist\Helper\Store\StoreManager;
 use Easy_Video_Playlist\Helper\Store\PlaylistData;
 use Easy_Video_Playlist\Helper\Store\VideoData;
+use Easy_Video_Playlist\Helper\Store\SourceData;
 use Easy_Video_Playlist\Helper\Functions\Utility as Utility_Fn;
 
 /**
@@ -97,11 +98,11 @@ class Get_Playlist {
 		}
 
 		// Fetch fresh data, if required.
-		if ( $playlist_data->isUpdateRequired() ) {
-			$playlist_data = $this->fetch_new_data( $playlist_data );
-		}
+		// if ( $playlist_data->isUpdateRequired() ) {
+		// 	$playlist_data = $this->fetch_new_data( $playlist_data );
+		// }
 
-		return $playlist_data->retrieve();
+		return $playlist_data;
 	}
 
 	/**
@@ -120,12 +121,33 @@ class Get_Playlist {
 		$videos      = $data['videos'];
 		$sources     = $data['sources'];
 		$vid_objects = array();
+		$source_objs = array();
 		foreach ( $videos as $key => $video ) {
-			$video      = array_combine( array_map( array( $this, comptible_vdata_keys ), array_keys( $video ) ), $video );
+			$video      = array_combine( array_map( array( $this, 'comptible_vdata_keys' ), array_keys( $video ) ), $video );
 			$vid_object = new VideoData();
 			$vid_data   = wp_parse_args( $video, $vid_object->get_defaults() );
 			$vid_object->set( $vid_data, false, 'none' );
 			$vid_objects[ $key ] = $vid_object;
+		}
+
+		$filtered_vids = array_filter( $videos, array( $this, 'is_from_valid_source' ) );
+		$source_data   = array_column( $filtered_vids, 'source' );
+
+		foreach ( $sources as $source_type => $source_ids ) {
+			if ( in_array( $source_type, array( 'video', 'url' ) ) ) {
+				continue;
+			}
+
+			foreach ( $source_ids as $source_id ) {
+				if ( ! in_array( $source_id, $source_data ) ) {
+					continue;
+				}
+				$source_obj = new SourceData();
+				$source_obj->set( 'provider', 'youtube' );
+				$source_obj->set( 'id', $source_id );
+				$source_obj->set( 'type', $source_type );
+				$source_objs[] = $source_obj;
+			}
 		}
 
 		// Create playlist data object.
@@ -133,14 +155,24 @@ class Get_Playlist {
 		$pl_object->set( $pl_object->get_defaults(), false, 'none' );
 		$pl_object->set( 'title', $this->storemanager->get_data_index( $this->playlist_key, 'bucket_title' ) );
 		$pl_object->set( 'videos', $vid_objects );
-		$pl_object->set( 'sort_order', array_keys( $videos ) );
-		$pl_object->set( 'sources', $sources );
+		$pl_object->set( 'sources', $source_objs );
 
 		// Update playlist data in DB.
 		$this->storemanager->update_data( $this->playlist_key, $pl_object );
 
 		// Return the playlist object.
 		return $pl_object;
+	}
+
+	/**
+	 * Check if video has a valid source.
+	 *
+	 * @since  1.2.0
+	 *
+	 * @param array $video Video data.
+	 */
+	private function is_from_valid_source( $video ) {
+		return isset( $video['provider'] ) && 'youtube' === $video['provider'] && isset( $video['type'] ) && 'video' !== $video['type'] && isset( $video['source'] );
 	}
 
 	/**

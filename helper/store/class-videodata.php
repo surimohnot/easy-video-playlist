@@ -191,6 +191,15 @@ class VideoData extends StoreBase {
 	protected $source_id;
 
 	/**
+	 * Holds modified data of the properties.
+	 *
+	 * @since  1.2.0
+	 * @access protected
+	 * @var    array
+	 */
+	protected $custom_values = array();
+
+	/**
 	 * Get escape functions.
 	 *
 	 * @since 1.0.0

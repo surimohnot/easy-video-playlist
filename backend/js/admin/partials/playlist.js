@@ -85,6 +85,7 @@ class Playlist {
             const container = this.listManager.find('.evp-playlists-content');
             const content = container.find('.evp-video-index-list');
             const videos = firstPlaylist.videos || {};
+            console.log(videos);
             const videoMarkup = `${Object.keys(videos).map((key) => {
                 const video = videos[key];
                 const url = video.url || '';
@@ -305,7 +306,7 @@ class Playlist {
             }
         }
 
-        // Check YouTube URL patterns
+        // Check Vimeo URL patterns
         for (const { pattern, type } of vimeoPatterns) {
             const matches = url.match(pattern);
             if (matches) {

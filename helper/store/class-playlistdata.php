@@ -102,7 +102,8 @@ class PlaylistData extends StoreBase {
 			'title'          => 'title',
 			'description'    => 'desc',
 			'videos'         => 'none',
-			'sources'        => 'arr_arr_string',
+			'sources'        => 'none',
+			'sort_order'     => 'none',
 			'last_updated'   => 'date',
 			'cache_duration' => 'int',
 		);
@@ -124,12 +125,13 @@ class PlaylistData extends StoreBase {
 			);
 		}
 
+		$sources = $this->get_sources();
+
 		// Data type declaration for safe and proper data output.
 		$retrieve = $this->get(
 			array(
 				'title',
 				'description',
-				'sources',
 				'last_updated',
 				'cache_duration',
 			),
@@ -137,6 +139,7 @@ class PlaylistData extends StoreBase {
 		);
 
 		$retrieve['videos'] = $videos;
+		$retrieve['sources'] = $sources;
 		return $retrieve;
 	}
 
@@ -159,7 +162,45 @@ class PlaylistData extends StoreBase {
 			$id             = $video_data['id'];
 			$vid_arr[ $id ] = $video_data;
 		}
+
+		$sort_order = $this->get( 'sort_order' );
+
+		// Sort by sort order
+		if ( ! empty( $sort_order ) ) {
+			$sorted_video_arr = array();
+			foreach ( $sort_order as $id ) {
+				if ( isset( $vid_arr[ $id ] ) ) {
+					$sorted_video_arr[ $id ] = $vid_arr[ $id ];
+					unset( $vid_arr[ $id ] );
+				}
+			}
+		
+			foreach ( $vid_arr as $id => $video ) {
+				$sorted_video_arr[ $id ] = $video;
+			}
+			$vid_arr = $sorted_video_arr;
+		}
+
 		return $vid_arr; // TODO: send videos after sorting.
+	}
+
+	/**
+	 * Get sources for the playlist in proper format.
+	 *
+	 * @since 1.2.0
+	 */
+	public function get_sources() {
+		$sources = $this->get( 'sources' );
+		$source_arr = array();
+		foreach ( $sources as $source ) {
+			$source_data = $source->retrieve();
+			if ( ! isset( $source_data['id'] ) ) {
+				continue;
+			}
+			$id             = $source_data['id'];
+			$source_arr[ $id ] = $source_data;
+		}
+		return $source_arr;
 	}
 
 	/**

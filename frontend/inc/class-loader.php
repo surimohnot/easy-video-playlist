@@ -13,6 +13,8 @@ use Easy_Video_Playlist\Helper\Store\StoreManager;
 use Easy_Video_Playlist\Helper\Core\Singleton;
 use Easy_Video_Playlist\Helper\Functions\Getters;
 use Easy_Video_Playlist\Helper\Core\Icon_Loader;
+use Easy_Video_Playlist\Helper\Playlist\Get_Playlist;
+use Easy_Video_Playlist\Helper\Store\PlaylistData;
 
 /**
  * Load frontend specific resources to the page.
@@ -56,11 +58,13 @@ class Loader extends Singleton {
             return;
         }
 
-        $store_manager = StoreManager::get_instance();
-
         foreach ( $playlists as $key => $playlist ) {
-            $data = $store_manager->get_data( $key );
-            $pl_data[ $key ] = $data ? $data : array();
+            $obj    = new Get_Playlist( $key );
+		    $p_data = $obj->init();
+            if ( ! $p_data || ! $p_data instanceof PlaylistData ) {
+                continue;
+            }
+            $pl_data[ $key ] = $p_data->retrieve();
         }
 
         wp_enqueue_script(
