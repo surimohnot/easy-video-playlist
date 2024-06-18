@@ -85,7 +85,6 @@ class Playlist {
             const container = this.listManager.find('.evp-playlists-content');
             const content = container.find('.evp-video-index-list');
             const videos = firstPlaylist.videos || {};
-            console.log(videos);
             const videoMarkup = `${Object.keys(videos).map((key) => {
                 const video = videos[key];
                 const url = video.url || '';
@@ -167,7 +166,7 @@ class Playlist {
     createEditVideoModal(videoData) {
         const i18n  = vars.i18n;
         const modal = jQuery('.evp-video-modal');
-        const thumbUrl = videoData.thumbnail_url.length ? videoData.thumbnail_url[0] : '';
+        const thumbUrl = videoData.thumbnail_url?.[0] ?? '';
         const markup = jQuery(
             sprintf(
                 addVideoEditForm(),

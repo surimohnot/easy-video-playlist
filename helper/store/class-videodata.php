@@ -278,7 +278,7 @@ class VideoData extends StoreBase {
 			'author_name'    => '',
 			'author_url'     => '',
 			'author_id'      => '',
-			'thumbnail_url'  => '',
+			'thumbnail_url'  => array(),
 			'id'             => '',
 			'date'           => '',
 			'tags'           => '',

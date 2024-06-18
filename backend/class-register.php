@@ -100,10 +100,10 @@ class Register {
         $core = Core::get_instance();
         add_action( 'wp_ajax_evp_add_new_playlist', array( $core, 'add_new_playlist' ) );
         add_action( 'wp_ajax_evp_delete_playlist', array( $core, 'delete_playlist' ) );
-        add_action( 'wp_ajax_evp_add_new_video', array( $core, 'add_new_video_new' ) );
-        add_action( 'wp_ajax_evp_delete_video', array( $core, 'delete_video_new' ) );
-        add_action( 'wp_ajax_evp_edit_video_info', array( $core, 'edit_video_info_new' ) );
-        add_action( 'wp_ajax_evp_save_playlist_sorting', array( $core, 'save_playlist_sorting_new' ) );
+        add_action( 'wp_ajax_evp_add_new_video', array( $core, 'add_new_video' ) );
+        add_action( 'wp_ajax_evp_delete_video', array( $core, 'delete_video' ) );
+        add_action( 'wp_ajax_evp_edit_video_info', array( $core, 'edit_video_info' ) );
+        add_action( 'wp_ajax_evp_save_playlist_sorting', array( $core, 'save_playlist_sorting' ) );
         add_action( 'wp_ajax_evp_save_api_key', array( $core, 'save_api_key' ) );
     }
 

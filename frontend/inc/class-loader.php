@@ -51,7 +51,7 @@ class Loader extends Singleton {
         $pl_data   = array();
 
         if ( empty( $playlists ) ) {
-            $playlists = Getters::get_playlists();
+            $playlists = Getters::get_playlist_index();
         }
 
         if ( empty( $playlists ) ) {

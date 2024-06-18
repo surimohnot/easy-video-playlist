@@ -159,8 +159,9 @@ class PlaylistData extends StoreBase {
 			if ( ! isset( $video_data['id'] ) ) {
 				continue;
 			}
-			$id             = $video_data['id'];
-			$vid_arr[ $id ] = $video_data;
+			$id               = $video_data['id'];
+			$video_data['id'] = str_replace( 'vimeo_', '', $id );
+			$vid_arr[ $id ]   = $video_data;
 		}
 
 		$sort_order = $this->get( 'sort_order' );

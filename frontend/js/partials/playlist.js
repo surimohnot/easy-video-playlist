@@ -156,9 +156,14 @@ class Playlist {
             return;
         }
 
-        const video = videos[videoID];
+        let video = videos[videoID];
         if ( ! video ) {
-            return;
+
+            // Vimeo video keys have a 'vimeo_' prefix as they have numerical video IDs which creates problems with sorting.
+            video = videos['vimeo_' + videoID];
+            if ( ! video ) {
+                return;
+            }
         }
 
         this.currentlyPlaying = selectedVideo;

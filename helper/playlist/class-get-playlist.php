@@ -123,7 +123,13 @@ class Get_Playlist {
 		$vid_objects = array();
 		$source_objs = array();
 		foreach ( $videos as $key => $video ) {
-			$video      = array_combine( array_map( array( $this, 'comptible_vdata_keys' ), array_keys( $video ) ), $video );
+			$video = array_combine( array_map( array( $this, 'comptible_vdata_keys' ), array_keys( $video ) ), $video );
+			
+			// Vimeo has numerical keys for videos. This can create problems with storing and sorting of data.
+			// Convert to string keys.
+			if ( isset( $video['provider'] ) && 'vimeo' === $video['provider'] && isset( $video['id'] ) ) {
+				$video['id'] = 'vimeo_' . $video['id'];
+			}
 			$vid_object = new VideoData();
 			$vid_data   = wp_parse_args( $video, $vid_object->get_defaults() );
 			$vid_object->set( $vid_data, false, 'none' );

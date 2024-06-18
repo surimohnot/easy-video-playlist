@@ -60,8 +60,8 @@ class Fetch_Url extends Singleton {
 			'url'           => esc_url_raw( $url ),
 			'thumbnail_url' => array(),
 			'id'            => md5( $url ),
-			'provider'      => $service,
-			'type'          => $provider_type,
+			'provider'      => 'url',
+			'type'          => 'video',
 		);
 		$user = wp_get_current_user();
 		$author_name = $user ? $user->display_name : '';
@@ -77,6 +77,7 @@ class Fetch_Url extends Singleton {
 		$obj->set( 'source_id', md5( $url ) );
 		$obj->set( 'source_type', 'video' );
 		$obj->set( 'provider', 'url' );
+		$obj->set( 'thumbnail_url', array() );
 
 		return $obj;
 	}
