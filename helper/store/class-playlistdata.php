@@ -226,7 +226,8 @@ class PlaylistData extends StoreBase {
 	 * @since 1.1.0
 	 */
 	public function isUpdateRequired() {
-		if ( $this->last_updated && $this->last_updated > ( time() - $this->cache_duration ) ) {
+		$last_updated = $this->get( 'last_updated' );
+		if ( $last_updated && $last_updated > ( time() - $this->cache_duration ) ) {
 			return false;
 		}
 		return true;

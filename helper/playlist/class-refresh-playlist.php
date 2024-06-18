@@ -9,9 +9,11 @@
 
 namespace Easy_Video_Playlist\Helper\Playlist;
 
+use Easy_Video_Playlist\Helper\Functions\Getters;
 use Easy_Video_Playlist\Helper\Store\StoreManager;
 use Easy_Video_Playlist\Helper\Store\PlaylistData;
 use Easy_Video_Playlist\Helper\Store\VideoData;
+use Easy_Video_Playlist\Helper\Store\SourceData;
 
 /**
  * Fetch fresh playlist data from the original source.
@@ -30,80 +32,21 @@ class Refresh_Playlist {
 	private $playlist_key = null;
 
 	/**
-	 * Holds old the playlist data.
-	 *
-	 * @since  1.2.0
-	 * @access private
-	 * @var    string $prev_data
-	 */
-	private $prev_data = null;
-
-	/**
-	 * Holds the storemanager instance.
-	 *
-	 * @since  1.2.0
-	 * @access private
-	 * @var    object $storemanager
-	 */
-	private $storemanager = null;
-
-	/**
-	 * Holds YouTube video Ids.
-	 *
-	 * @since  1.2.0
-	 * @access private
-	 * @var    array $videos
-	 */
-	private $youtube_videos = array();
-
-	/**
-	 * Holds Vimeo video Ids.
-	 *
-	 * @since  1.2.0
-	 * @access private
-	 * @var    array $videos
-	 */
-	private $vimeo_videos = array();
-
-	/**
-	 * Holds instance of Fetch YouTube class.
-	 *
-	 * @since  1.2.0
-	 * @access private
-	 * @var    object $fetch_youtube
-	 */
-	private $fetch_youtube = null;
-
-	/**
-	 * Holds instance of Fetch Vimeo class.
-	 *
-	 * @since  1.2.0
-	 * @access private
-	 * @var    object $fetch_vimeo
-	 */
-	private $fetch_vimeo = null;
-
-	/**
 	 * Constructor method.
 	 *
 	 * @since  1.2.0
 	 *
 	 * @param string $playlist_key Playlist Key.
-	 * @param string $prev_data    Previous Data.
 	 */
-	public function __construct( $playlist_key, $prev_data ) {
+	public function __construct( $playlist_key ) {
 
 		// Return if playlist key is not provided.
-		if ( empty( $playlist_key ) || ! $prev_data instanceof PlaylistData ) {
+		if ( empty( $playlist_key ) ) {
 			return new \WP_Error( 'no_key', 'No playlist key or proper data provided.' );
 		}
 
 		// Set Object Properties.
 		$this->playlist_key  = $playlist_key;
-		$this->prev_data     = $prev_data;
-		$this->storemanager  = StoreManager::get_instance();
-		$this->fetch_youtube = Fetch_Youtube::get_instance();
-		$this->fetch_vimeo   = Fetch_Vimeo::get_instance();
 	}
 
 	/**
@@ -112,193 +55,78 @@ class Refresh_Playlist {
 	 * @since  1.2.0
 	 */
 	public function init() {
-		// Retrieve updated list of video ids from all sources of the playlist.
-		$this->retrieve_video_ids();
+		$obj    = new Get_Playlist( $this->playlist_key, false );
+		$p_data = $obj->init();
+		if ( ! $p_data || ! $p_data instanceof PlaylistData ) {
+			$message = __( 'Incorrect Playlist data available.', 'evp_video_player' );
+			return new \WP_Error( 'no_data', $message );
+		}
 
-		// Fetch Video Data.
-		$video_data = $this->fetch_video_data();
+		$sources = $p_data->get( 'sources' );
+		$videos  = $p_data->get( 'videos' );
 
-		// Update playlist data.
-		$this->prev_data->set( 'videos', $video_data );
+		$video_data = $this->fetch_video_data( $sources );
+		$videos     = $this->merge_video_data( $videos, $video_data );
+		$p_data->set( 'videos', $videos );
+		$p_data->set( 'last_updated', time() );
+
+		$store_manager = StoreManager::get_instance();
+		$store_manager->update_data( $this->playlist_key, $p_data );
+		return $p_data;
 	}
 
 	/**
-	 * Init method.
+	 * Fetch video data for each source of the playlist.
 	 *
 	 * @since  1.2.0
+	 *
+	 * @param array $sources Array of sources.
 	 */
-	public function retrieve_video_ids() {
-		$prev_sources = $this->prev_data->get( 'sources', 'sanitize' );
-		$vid_list     = $this->prev_data->get_videos();
-		$videos       = array();
-		foreach ( $prev_sources as $source => $ids ) {
-			$ids = $ids && is_array( $ids ) ? $ids : array();
-			switch ( $source ) {
-				case 'video':
-					foreach ( $ids as $id ) {
-						if ( isset( $vid_list[ $id ] ) && is_array( $vid_list[ $id ] ) && isset( $vid_list[ $id ]['provider'] ) ) {
-							if ( 'youtube' === $vid_list[ $id ]['provider'] ) {
-								$this->youtube_videos[ $id ] = array(
-									'type' => 'video',
-									'id'   => $id,
-								);
-							} elseif ( 'vimeo' === $vid_list[ $id ]['provider'] ) {
-								$this->vimeo_videos[ $id ] = array(
-									'type' => 'video',
-									'id'   => $id,
-								);
-							}
-						}
-					}
-					break;
-				case 'youtube_video':
-					foreach ( $ids as $id ) {
-						$this->youtube_videos[ $id ] = array(
-							'type' => 'video',
-							'id'   => $id,
-						);
-					}
-					break;
-				case 'playlist':
-				case 'youtube_playlist':
-					foreach ( $ids as $id ) {
-						$video_ids = $this->fetch_youtube->video_ids_from_playlist( $id );
-						foreach ( $video_ids as $vid ) {
-							$this->youtube_videos[ $vid ] = array(
-								'type' => 'playlist',
-								'id'   => $id,
-							);
-						}
-					}
-					break;
-				case 'channel':
-				case 'youtube_channel':
-					foreach ( $ids as $id ) {
-						$video_ids = $this->fetch_youtube->video_ids_from_channel( $id );
-						foreach ( $video_ids as $vid ) {
-							$this->youtube_videos[ $vid ] = array(
-								'type' => 'channel',
-								'id'   => $id,
-							);
-						}
-					}
-					break;
-				case 'user':
-				case 'youtube_user':
-					foreach ( $ids as $id ) {
-						$video_ids = $this->fetch_youtube->video_ids_from_user( $id );
-						foreach ( $video_ids as $vid ) {
-							$this->youtube_videos[ $vid ] = array(
-								'type' => 'user',
-								'id'   => $id,
-							);
-						}
-					}
-					break;
-				case 'youtube_channelUser':
-					foreach ( $ids as $id ) {
-						$video_ids = $this->fetch_youtube->video_ids_from_channeluser( $id );
-						foreach ( $video_ids as $vid ) {
-							$this->youtube_videos[ $vid ] = array(
-								'type' => 'channelUser',
-								'id'   => $id,
-							);
-						}
-					}
-					break;
-				case 'vimeo_video':
-					foreach ( $ids as $id ) {
-						$this->vimeo_videos[ $id ] = array(
-							'type' => 'video',
-							'id'   => $id,
-						);
-					}
-					break;
-				case 'vimeo_user':
-					foreach ( $ids as $id ) {
-						$video_ids = $this->get_vimeo_videos( $id, 'user' );
-						foreach ( $video_ids as $vid ) {
-							$this->vimeo_videos[ $vid ] = array(
-								'type' => 'user',
-								'id'   => $id,
-							);
-						}
-					}
-					break;
-				case 'vimeo_channel':
-					foreach ( $ids as $id ) {
-						$video_ids = $this->get_vimeo_videos( $id, 'channel' );
-						foreach ( $video_ids as $vid ) {
-							$this->vimeo_videos[ $vid ] = array(
-								'type' => 'channel',
-								'id'   => $id,
-							);
-						}
-					}
-					break;
-				case 'vimeo_album':
-					foreach ( $ids as $id ) {
-						$video_ids = $this->get_vimeo_videos( $id, 'album' );
-						foreach ( $video_ids as $vid ) {
-							$this->vimeo_videos[ $vid ] = array(
-								'type' => 'channel',
-								'id'   => $id,
-							);
-						}
-					}
-					break;
-				case 'vimeo_showcase':
-					foreach ( $ids as $id ) {
-						$video_ids = $this->get_vimeo_videos( $id, 'showcase' );
-						foreach ( $video_ids as $vid ) {
-							$this->vimeo_videos[ $vid ] = array(
-								'type' => 'showcase',
-								'id'   => $id,
-							);
-						}
-					}
-					break;
-				case 'vimeo_group':
-					foreach ( $ids as $id ) {
-						$video_ids = $this->get_vimeo_videos( $id, 'group' );
-						foreach ( $video_ids as $vid ) {
-							$this->vimeo_videos[ $vid ] = array(
-								'type' => 'group',
-								'id'   => $id,
-							);
-						}
-					}
-					break;
-				default:
-					break;
+	private function fetch_video_data( $sources ) {
+		$vid_data = array();
+		foreach ( $sources as $source ) {
+			if ( ! $source instanceof SourceData ) {
+				continue;
+			}
+			$source_id   = $source->get( 'id' );
+			$source_type = $source->set( 'type' );
+			$url         = $source->get( 'url' );
+			$provider    = $source->get( 'provider' );
+			$video_data  = Getters::get_data_from_source( $source_id, $source_type, $url, $provider );
+			$video_data  = $video_data && is_array( $video_data ) ? $video_data : array();
+			$vid_data    = array_merge( $vid_data, $video_data );
+		}
+		return $vid_data;
+	}
+
+	/**
+	 * Merge video data with the playlist data.
+	 *
+	 * @since  1.2.0
+	 *
+	 * @param array $videos  Array of videos.
+	 * @param array $vid_data Array of video data.
+	 */
+	private function merge_video_data( $videos, $vid_data ) {
+		$video_arr = array();
+		foreach ( $videos as $video ) {
+			if ( ! $video || ! $video instanceof VideoData ) {
+				continue;
+			}
+			$id               = $video->get( 'id' );
+			$video_arr[ $id ] = $video;
+		}
+
+		if ( ! empty( $vid_data ) && is_array( $vid_data ) ) {
+			foreach ( $vid_data as $vdata ) {
+				if ( ! $vdata || ! $vdata instanceof VideoData ) {
+					continue;
+				}
+				$id = $vdata->get( 'id' );
+				$video_arr[ $id ] = $vdata;
 			}
 		}
-	}
 
-	/**
-	 * Get vimeo videos Ids.
-	 *
-	 * This is just a placeholder function for now. Will be useful when we support Vimeo API.
-	 *
-	 * @since  1.2.0
-	 *
-	 * @param  array  $ids  Ids.
-	 * @param  string $type Type.
-	 */
-	private function get_vimeo_videos( $ids, $type ) {
-		// TODO: Add Vimeo API.
-		return array();
-	}
-
-	/**
-	 * Fetch Video Data.
-	 *
-	 * @since  1.2.0
-	 */
-	private function fetch_video_data() {
-		// Fetch video data for YouTube videos.
-		$yt_video_data  = $this->fetch_youtube->video_data( $this->youtube_videos );
-		$vimeo_vid_data = $this->fetch_vimeo->video_data( $this->youtube_videos );
-		return array_merge( $yt_video_data, $vimeo_vid_data );
+		return array_values( $video_arr );
 	}
 }

@@ -51,6 +51,15 @@ class SourceData extends StoreBase {
 	protected $id;
 
 	/**
+	 * Holds Source URL (if available).
+	 *
+	 * @since  1.0.0
+	 * @access protected
+	 * @var    string
+	 */
+	protected $url = '';
+
+	/**
 	 * Holds source information.
 	 *
 	 * @since  1.2.0
@@ -70,6 +79,7 @@ class SourceData extends StoreBase {
 			'provider' => 'string',
 			'type'     => 'string',
 			'id'       => 'string',
+			'url'      => 'url',
 			'info'     => 'none',
 		);
 	}
@@ -90,6 +100,7 @@ class SourceData extends StoreBase {
 				'provider',
 				'type',
 				'id',
+				'url',
 			),
 			$context
 		);

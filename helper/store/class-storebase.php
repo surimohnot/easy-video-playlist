@@ -254,7 +254,15 @@ class StoreBase {
 		if ( 'sanitize' === $context ) {
 			return sanitize_text_field( $val );
 		} else {
-			return esc_html( $val );
+			$unix = strtotime( $val );
+			if ( $unix ) {
+				return $unix;
+			} else {
+				if ( is_numeric( $val ) ) {
+					return absint( $val );
+				}
+			}
+			return absint( '' );
 		}
 	}
 

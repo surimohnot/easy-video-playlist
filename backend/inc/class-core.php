@@ -16,9 +16,6 @@ use Easy_Video_Playlist\Helper\Playlist\Get_Playlist;
 use Easy_Video_Playlist\Helper\Store\PlaylistData;
 use Easy_Video_Playlist\Helper\Store\VideoData;
 use Easy_Video_Playlist\Helper\Store\SourceData;
-use Easy_Video_Playlist\Helper\Playlist\Fetch_YouTube;
-use Easy_Video_Playlist\Helper\Playlist\Fetch_Vimeo;
-use Easy_Video_Playlist\Helper\Playlist\Fetch_Url;
 
 /**
  * Handle admin specific functionality of the plugin.
@@ -159,17 +156,7 @@ class Core extends Singleton {
 					$id               = $video->get( 'id' );
 					$video_arr[ $id ] = $video;
 				}
-				$video_data = array();
-				if ( 'youtube' === $provider ) {
-					$yt_obj     = Fetch_YouTube::get_instance();
-					$video_data = $yt_obj->get_data( $source_id, $source_type );
-				} elseif ( 'vimeo' === $provider ) {
-					$vm_obj     = Fetch_Vimeo::get_instance();
-					$video_data = $vm_obj->get_data( $source_id, $source_type );
-				} elseif ( 'url' === $provider ) {
-					$url_obj    = Fetch_Url::get_instance();
-					$video_data = $url_obj->get_data( $url );
-				}
+				$video_data = Getters::get_data_from_source( $source_id, $source_type, $url, $provider );
 				if ( ! empty( $video_data ) && is_array( $video_data ) ) { 
 					foreach ( $video_data as $vdata ) {
 						if ( ! $vdata || ! $vdata instanceof VideoData ) {
@@ -184,6 +171,7 @@ class Core extends Singleton {
 						$new_source->set( 'prvider', $provider );
 						$new_source->set( 'id', $source_id );
 						$new_source->set( 'type', $source_type );
+						$new_source->set( 'url', $url );
 						$source_arr[ $source_id ] = $new_source;
 					}
 

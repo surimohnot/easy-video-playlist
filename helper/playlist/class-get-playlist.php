@@ -14,6 +14,7 @@ use Easy_Video_Playlist\Helper\Store\PlaylistData;
 use Easy_Video_Playlist\Helper\Store\VideoData;
 use Easy_Video_Playlist\Helper\Store\SourceData;
 use Easy_Video_Playlist\Helper\Functions\Utility as Utility_Fn;
+use Easy_Video_Playlist\Helper\Playlist\Refresh_Playlist;
 
 /**
  * Get Playlist Data from Database OR from external original source.
@@ -32,6 +33,15 @@ class Get_Playlist {
 	private $playlist_key = null;
 
 	/**
+	 * Check if playlist update is required.
+	 *
+	 * @since  1.2.0
+	 * @access private
+	 * @var    bool $update_required
+	 */
+	private $update_required = false;
+
+	/**
 	 * Holds the storemanager instance.
 	 *
 	 * @since  1.2.0
@@ -46,12 +56,15 @@ class Get_Playlist {
 	 * @since  1.2.0
 	 *
 	 * @param string $playlist_key Playlist Key.
+	 * @param bool   $update_required Is update required.
 	 */
-	public function __construct( $playlist_key = '' ) {
+	public function __construct( $playlist_key = '', $update_required = true ) {
 		// Set Object Properties.
 		if ( ! empty( $playlist_key ) ) {
 			$this->playlist_key = $playlist_key;
 		}
+
+		$this->update_required = $update_required;
 		$this->storemanager = StoreManager::get_instance();
 	}
 
@@ -98,9 +111,9 @@ class Get_Playlist {
 		}
 
 		// Fetch fresh data, if required.
-		// if ( $playlist_data->isUpdateRequired() ) {
-		// 	$playlist_data = $this->fetch_new_data( $playlist_data );
-		// }
+		if ( $this->update_required && $playlist_data->isUpdateRequired() ) {
+			$playlist_data = $this->fetch_new_data();
+		}
 
 		return $playlist_data;
 	}
@@ -148,10 +161,12 @@ class Get_Playlist {
 				if ( ! in_array( $source_id, $source_data ) ) {
 					continue;
 				}
+				$source_url = $this->get_source_url( $source_type, $source_id );
 				$source_obj = new SourceData();
 				$source_obj->set( 'provider', 'youtube' );
 				$source_obj->set( 'id', $source_id );
 				$source_obj->set( 'type', $source_type );
+				$source_obj->set( 'url', $source_url );
 				$source_objs[] = $source_obj;
 			}
 		}
@@ -202,12 +217,33 @@ class Get_Playlist {
 	 * Fetch New Data.
 	 *
 	 * @since  1.2.0
-	 *
-	 * @param object $playlist_data Playlist Data.
 	 */
-	private function fetch_new_data( $playlist_data ) {
+	private function fetch_new_data() {
 		// TODO: Update functionality should only work if youtube, vimeo API are available.
-		$obj  = new Refresh_Playlist( $this->playlist_key, $playlist_data );
+		$obj  = new Refresh_Playlist( $this->playlist_key );
 		$data = $obj->init();
+		return $data;
+	}
+
+	/**
+	 * Get Source URL from Source ID and source type.
+	 *
+	 * @since  1.2.0
+	 *
+	 * @param string $source_type Source Type.
+	 * @param string $source_id Source ID.
+	 */
+	private function get_source_url( $source_type, $source_id ) {
+		if ( 'video' === $source_type ) {
+			return 'https://www.youtube.com/watch?v=' . $source_id;
+		} elseif ( 'playlist' === $source_type ) {
+			return 'https://www.youtube.com/playlist?list=' . $source_id;
+		} elseif ( 'channel' === $source_type ) {
+			return 'https://www.youtube.com/channel/' . $source_id;
+		} elseif ( 'user' === $source_type ) {
+			return 'https://www.youtube.com/user/' . $source_id;
+		}
+
+		return '';
 	}
 }

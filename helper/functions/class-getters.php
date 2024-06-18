@@ -12,6 +12,9 @@ namespace Easy_Video_Playlist\Helper\Functions;
 use Easy_Video_Playlist\Helper\Store\StoreManager;
 use Easy_Video_Playlist\Helper\Playlist\Get_Playlist;
 use Easy_Video_Playlist\Helper\Store\PlaylistData;
+use Easy_Video_Playlist\Helper\Playlist\Fetch_YouTube;
+use Easy_Video_Playlist\Helper\Playlist\Fetch_Vimeo;
+use Easy_Video_Playlist\Helper\Playlist\Fetch_Url;
 
 /**
  * Base class to get various playlist information.
@@ -102,5 +105,51 @@ class Getters {
 			return false;
 		}
 		return $data;
+	}
+
+	/**
+	 * Get video data from a given source.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param string $source_id Source ID.
+	 * @param string $source_type Source Type.
+	 * @param string $url Source URL.
+	 * @param string $provider Source Provider.
+	 */
+	public static function get_data_from_source( $source_id, $source_type, $url, $provider ) {
+		$valid_providers    = apply_filters(
+			'evp_valid_providers',
+			array( 'youtube', 'vimeo', 'url' )
+		);
+
+		$valid_source_types = apply_filters(
+			'evp_valid_source_types',
+			array( 'playlist', 'channel', 'user', 'video' )
+		);
+		
+		// Return if provider is not valid.
+		if ( ! in_array( $provider, $valid_providers, true ) ) {
+			return array();
+		}
+
+		// Return if source type is not valid.
+		if ( ! in_array( $source_type, $valid_source_types, true ) ) {
+			return array();
+		}
+		
+		$video_data = array();
+		if ( 'youtube' === $provider ) {
+			$yt_obj     = Fetch_YouTube::get_instance();
+			$video_data = $yt_obj->get_data( $source_id, $source_type );
+		} elseif ( 'vimeo' === $provider ) {
+			$vm_obj     = Fetch_Vimeo::get_instance();
+			$video_data = $vm_obj->get_data( $source_id, $source_type );
+		} elseif ( 'url' === $provider ) {
+			$url_obj    = Fetch_Url::get_instance();
+			$video_data = $url_obj->get_data( $url );
+		}
+
+		return $video_data;
 	}
 }
