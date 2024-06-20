@@ -307,7 +307,7 @@ class Playlist {
 
     clearSearch() {
         this.searchBox.val('');
-        this.playlistContainer.find('.evp-playlist-video-index-item').show();
+        this.playlistContainer.find('.evp-playlist-video-index-item').removeClass('is-hidden');
         this.playlistContainer.removeClass('evp-search-opened');
     }
 
@@ -319,12 +319,12 @@ class Playlist {
 			const $this = jQuery( this );
 			if ( isSearchTerm ) {
                 if ( $this.data( 'search-term' ).includes( searchTerm ) ) {
-                    $this.show();
+                    $this.removeClass('is-hidden');
                 } else {
-                    $this.hide();
+                    $this.addClass('is-hidden');
                 }
             } else {
-                $this.show();
+                $this.removeClass('is-hidden');
             }
 		});
 	}

@@ -38,6 +38,9 @@
                 border-bottom: none;
                 margin-bottom: 0;
             }
+            &.is-hidden {
+                display: none !important;
+            }
             &.evp-currently-playing {
                 background-color: var( --plyr-color-bg, #fff );
             }
