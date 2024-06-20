@@ -255,7 +255,7 @@ class Core extends Singleton {
 
 		$a_data = array(
 			'title' => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash($_POST['title'] ) ) : '',
-			'author' => isset( $_POST['author'] ) ? sanitize_text_field( wp_unslash( $_POST['author'] ) ) : '',
+			'author_name' => isset( $_POST['author'] ) ? sanitize_text_field( wp_unslash( $_POST['author'] ) ) : '',
 			'author_url' => isset( $_POST['author_url'] ) ? esc_url_raw( wp_unslash( $_POST['author_url'] ) ) : '',
 			'thumbnail_url' => isset( $_POST['thumb'] ) ? esc_url_raw( wp_unslash($_POST['thumb'] ) ) : '',
 		);

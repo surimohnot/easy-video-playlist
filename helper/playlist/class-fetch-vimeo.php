@@ -90,7 +90,7 @@ class Fetch_Vimeo extends Singleton {
 		}
 
 		$obj = new VideoData();
-		$obj->set( 'id', 'vimeo_' . $id );
+		$obj->set( 'id', $id );
 		$obj->set( 'date', isset( $data['upload_date'] ) ? $data['upload_date'] : '' );
 		$obj->set( 'title', isset( $data['title'] ) ? $data['title'] : '' );
 		$obj->set( 'url', 'https://vimeo.com/' . $id );
