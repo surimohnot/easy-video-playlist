@@ -55,6 +55,9 @@ Installing “Easy Video Playlist” can be done either by searching for “Podc
 
 == Changelog ==
 
+= 1.2.0 =
+* Modify: Complete code refactoring for better security, reliability and performance.
+
 = 1.0.0 =
 * First version.
 
